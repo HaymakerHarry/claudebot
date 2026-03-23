@@ -1,8 +1,26 @@
 {
-  "bankroll": 1000.0,
-  "trades": [],
+  "bankroll": 950.0,
+  "trades": [
+    {
+      "id": "T1774261969",
+      "market_id": "1666008",
+      "market": "Will Microsoft (MSFT) finish week of March 23 above $440?",
+      "position": "YES",
+      "entry_price": 2,
+      "stake": 50.0,
+      "potential_return": 2500.0,
+      "potential_profit": 2450.0,
+      "confidence": 85,
+      "true_prob": 25,
+      "market_prob": 2,
+      "reason": "MSFT at $440+ is reasonable for a mega-cap tech stock, and 2% odds seem extremely pessimistic for a 4-day window. Low volume suggests mispricing opportunity.",
+      "status": "open",
+      "placed_at": "2026-03-23T10:32:49.848502",
+      "paper": true
+    }
+  ],
   "daily_loss": 0.0,
   "daily_reset": "2026-03-23",
-  "scan_count": 1,
+  "scan_count": 2,
   "started": "2026-03-23T09:17:53.961678"
 }
