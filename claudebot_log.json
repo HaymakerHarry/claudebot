@@ -1,5 +1,5 @@
 {
-  "bankroll": 814.51,
+  "bankroll": 773.78,
   "trades": [
     {
       "id": "T1774261969",
@@ -68,10 +68,27 @@
       "status": "open",
       "placed_at": "2026-03-23T14:38:42.666481",
       "paper": true
+    },
+    {
+      "id": "T1774281775",
+      "market_id": "1115936",
+      "market": "Will Perplexity not IPO by December 31, 2027?",
+      "position": "YES",
+      "entry_price": 55,
+      "stake": 40.73,
+      "potential_return": 74.05,
+      "potential_profit": 33.32,
+      "confidence": 78,
+      "true_prob": 70,
+      "market_prob": 55,
+      "reason": "AI companies are facing tougher IPO conditions and Perplexity likely needs more time to build sustainable revenue before going public. The 21-month timeline is aggressive for a company still establishing its market position.",
+      "status": "open",
+      "placed_at": "2026-03-23T16:02:55.655092",
+      "paper": true
     }
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-03-23",
-  "scan_count": 5,
+  "scan_count": 6,
   "started": "2026-03-23T09:17:53.961678"
 }
