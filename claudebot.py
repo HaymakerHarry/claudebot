@@ -200,7 +200,7 @@ def fetch_markets():
                         continue
 
                     # Skip markets closing beyond our hold window
-                    if closes_in_days > MAX_HOLD_DAYS:
+                    if closes_in_days > MAX_HOLD_DAYS or closes_in_days < 0:
                         skipped_long += 1
                         continue
                 except Exception:
@@ -464,7 +464,9 @@ def place_paper_trade(rec, markets, state):
         log(f"  🛑 Daily loss limit hit")
         return state
 
-    closes_in_days = rec.get("closes_in_days", 7)
+    # Get closes_in_days from the actual market data, not Claude's rec
+    market_data = next((m for m in markets if m["id"] == rec["market_id"]), {})
+    closes_in_days = market_data.get("closes_in_days", rec.get("closes_in_days", 7))
     stake = kelly_size(rec["true_prob"], rec["market_prob"], state["bankroll"], closes_in_days)
     if stake < 1.00:
         log(f"  ⏭  Stake too small (${stake:.2f})")
