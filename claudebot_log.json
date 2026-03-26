@@ -1,5 +1,5 @@
 {
-  "bankroll": 950.6,
+  "bankroll": 1227.74,
   "trades": [
     {
       "id": "T1774412231",
@@ -48,14 +48,17 @@
         "Evening rain expected on March 26 could suppress afternoon peak but not eliminate chance of 27\u00b0C earlier"
       ],
       "bear_case": "Majority of forecast models (Meteored 79\u00b0F, Meteodays 75\u00b0F) show highs below 27\u00b0C. Polymarket traders pricing today's Taipei high at only 24\u00b0C at the airport suggests consistently cooler readings. Rain arriving could keep temperatures suppressed.",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-03-25T08:47:14.700307+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-03-26T13:09:17.280340+00:00",
+      "realized_pnl": 257.74
     }
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-03-26",
-  "scan_count": 41,
+  "scan_count": 42,
   "started": "2026-03-23T09:17:53.961678"
 }
