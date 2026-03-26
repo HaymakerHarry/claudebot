@@ -452,16 +452,13 @@ If after research no market has genuine edge ≥{MIN_EDGE_PCT}%, return exactly:
     log(f"🧠 Opus 4.6 analyzing {len(markets)} markets with extended thinking + web search...")
 
     try:
-        response = client.messages.create(
-            model=ANALYST_MODEL,
-            max_tokens=10000,
-            thinking={
-                "type": "enabled",
-                "budget_tokens": THINKING_BUDGET
-            },
-            tools=[{"type": "web_search_20250305", "name": "web_search"}],
-            messages=[{"role": "user", "content": prompt}]
-        )
+    response = client.messages.create(
+        model=ANALYST_MODEL,
+        max_tokens=16000,
+        thinking={"type": "adaptive"},
+        tools=[{"type": "web_search_20250305", "name": "web_search"}],
+        messages=[{"role": "user", "content": prompt}]
+    )
 
         # Process response blocks
         searches     = 0
