@@ -1,5 +1,5 @@
 {
-  "bankroll": 1100.44,
+  "bankroll": 1144.24,
   "trades": [
     {
       "id": "T1774412231",
@@ -22,10 +22,13 @@
         "No major competing app launch or news event likely to displace it in 2 days"
       ],
       "bear_case": "App Store rankings are inherently volatile; a viral app launch, ChatGPT feature update, or Perplexity/Gemini surge could push Claude to #3+ within 48 hours",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-03-25T04:17:11.880497+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-03-27T20:34:59.538755+00:00",
+      "realized_pnl": 31.22
     },
     {
       "id": "T1774428434",
@@ -163,10 +166,36 @@
       "placed_at": "2026-03-27T03:35:36.156812+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1774643892",
+      "market_id": "1701985",
+      "market": "Will the highest temperature in Wuhan be 21\u00b0C on March 28?",
+      "position": "YES",
+      "entry_price": 6,
+      "stake": 17.42,
+      "potential_return": 290.33,
+      "potential_profit": 272.91,
+      "confidence": 65,
+      "true_prob": 13,
+      "market_prob": 6,
+      "closes_in_days": 0.64,
+      "closes": "2026-03-28T12:00:00+00:00",
+      "research_summary": "Multiple forecast sources (AccuWeather 72\u00b0F/22.2\u00b0C, Meteored 73\u00b0F/22.8\u00b0C, weather-atlas 22\u00b0C) converge on a high of ~22\u00b0C for March 28. Polymarket AI notes model ensembles give 20-21\u00b0C combined a 31% probability. With same-day forecast error SD of 0.7-1.2\u00b0C, the probability of hitting exactly 21\u00b0C (20.5-21.5\u00b0C band) is approximately 10-17%, well above the 6% market price.",
+      "key_factors": [
+        "Forecast centered at 22\u00b0C with tight same-day uncertainty",
+        "21\u00b0C is only 1 degree below forecast - common occurrence",
+        "Model ensemble spread explicitly includes 20-21\u00b0C as viable alternatives at 31% combined"
+      ],
+      "bear_case": "Clear skies and hazy sunshine reduce forecast uncertainty; models may be tightly centered at exactly 22\u00b0C with very little downside risk, making 21\u00b0C less likely than a normal distribution would suggest",
+      "status": "open",
+      "placed_at": "2026-03-27T20:38:12.801725+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-03-27",
-  "scan_count": 54,
+  "scan_count": 55,
   "started": "2026-03-23T09:17:53.961678"
 }
