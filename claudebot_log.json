@@ -188,14 +188,17 @@
         "Model ensemble spread explicitly includes 20-21\u00b0C as viable alternatives at 31% combined"
       ],
       "bear_case": "Clear skies and hazy sunshine reduce forecast uncertainty; models may be tightly centered at exactly 22\u00b0C with very little downside risk, making 21\u00b0C less likely than a normal distribution would suggest",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-03-27T20:38:12.801725+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": false,
+      "resolved_at": "2026-03-28T08:35:08.609888+00:00",
+      "realized_pnl": -17.42
     }
   ],
-  "daily_loss": 0.0,
-  "daily_reset": "2026-03-27",
-  "scan_count": 55,
+  "daily_loss": 17.42,
+  "daily_reset": "2026-03-28",
+  "scan_count": 56,
   "started": "2026-03-23T09:17:53.961678"
 }
