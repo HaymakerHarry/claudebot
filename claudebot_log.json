@@ -1,5 +1,5 @@
 {
-  "bankroll": 1036.11,
+  "bankroll": 1005.03,
   "trades": [
     {
       "id": "T1774412231",
@@ -314,10 +314,13 @@
       ],
       "bear_case": "OG's higher world ranking (#42 vs #62) reflects genuine strength; BO1 format has high variance; HLTV votes can be unreliable/biased",
       "kelly_tier": "quarter-Kelly (3.0%)",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-03-29T08:41:40.553733+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": false,
+      "resolved_at": "2026-03-29T17:03:08.883639+00:00",
+      "realized_pnl": -36.5
     },
     {
       "id": "T1774779993",
@@ -402,11 +405,39 @@
       "placed_at": "2026-03-29T15:34:07.699424+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1774803965",
+      "market_id": "1761367",
+      "market": "Valorant: ShindeN vs Melser Kindergarten (BO5) - VCL Latin America South Playoffs",
+      "position": "YES",
+      "entry_price": 66,
+      "stake": 31.08,
+      "potential_return": 47.09,
+      "potential_profit": 16.01,
+      "confidence": 63,
+      "true_prob": 74,
+      "market_prob": 66,
+      "category": "sports",
+      "closes_in_days": 0.33,
+      "closes": "2026-03-30T01:00:00+00:00",
+      "research_summary": "ShindeN defeated Melser Kindergarten 2-0 in the Upper Final on March 22, overperforming their pre-match underdog odds of 2.56 (implied ~39%). In the BO5 grand final, ShindeN holds both upper bracket advantage and demonstrated head-to-head superiority against this exact opponent.",
+      "key_factors": [
+        "Convincing 2-0 win over same opponent in Upper Final one week ago",
+        "BO5 format significantly favors the stronger team vs shorter series",
+        "Upper bracket advantage in double elimination grand final structure"
+      ],
+      "bear_case": "Melser Kindergarten has had a full week to study replays and develop anti-strats specifically targeting ShindeN; grand finals often produce different dynamics than earlier rounds, and VCL minor leagues can be volatile.",
+      "kelly_tier": "quarter-Kelly (3.0%)",
+      "status": "open",
+      "placed_at": "2026-03-29T17:06:05.660351+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
-  "daily_loss": 0.0,
+  "daily_loss": 36.5,
   "daily_reset": "2026-03-29",
-  "scan_count": 71,
+  "scan_count": 72,
   "started": "2026-03-23T09:17:53.961678",
   "last_daily_summary": "2026-03-29"
 }
