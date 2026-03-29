@@ -165,7 +165,7 @@ def telegram_daily_summary(state):
         f"🔄 Total Scans: <b>{state.get('scan_count', 0)}</b>\n"
         f"{'─' * 30}\n"
         f"📋 Open Positions ({len(open_t)}/{MAX_OPEN_POSITIONS}):\n"
-        f"{positions_txt if positions_txt else '  None\n'}"
+        f"{positions_txt if positions_txt else '  None'}\n"
         f"{'─' * 30}\n"
         f"⏰ Next scan in ~3 hours"
     )
