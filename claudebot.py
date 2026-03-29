@@ -587,6 +587,7 @@ def opus_analyze(markets, state):
             model=ANALYST_MODEL,
             max_tokens=8000,
             tools=[{"type": "web_search_20250305", "name": "web_search"}],
+            tool_choice={"type": "tool", "name": "web_search"},
             messages=[{"role": "user", "content": research_prompt}]
         )
 
