@@ -30,6 +30,7 @@ import anthropic
 ANTHROPIC_API_KEY    = os.environ.get("ANTHROPIC_API_KEY", "")
 TELEGRAM_BOT_TOKEN   = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHANNEL_ID  = os.environ.get("TELEGRAM_CHANNEL_ID", "")
+TELEGRAM_PERSONAL_ID = os.environ.get("TELEGRAM_PERSONAL_ID", "")  # your personal chat ID
 
 SCREENER_MODEL     = "claude-haiku-4-5-20251001"
 ANALYST_MODEL      = "claude-opus-4-6"
@@ -67,15 +68,19 @@ def log(msg):
 #  TELEGRAM
 # ─────────────────────────────────────────────────────────
 
-def send_telegram(msg):
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
+def send_telegram(msg, chat_id=None):
+    """Send to a specific chat_id, or default channel if not specified."""
+    if not TELEGRAM_BOT_TOKEN:
+        return
+    target = chat_id or TELEGRAM_CHANNEL_ID
+    if not target:
         return
     try:
         url  = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        data = {"chat_id": TELEGRAM_CHANNEL_ID, "text": msg, "parse_mode": "HTML"}
+        data = {"chat_id": target, "text": msg, "parse_mode": "HTML"}
         r    = requests.post(url, json=data, timeout=10)
         if r.status_code == 200:
-            log("📨 Telegram sent")
+            log(f"📨 Telegram sent → {target}")
         else:
             log(f"⚠️  Telegram error: {r.status_code} — {r.text[:100]}")
     except Exception as e:
@@ -83,6 +88,10 @@ def send_telegram(msg):
 
 
 def telegram_new_trade(trade, state):
+    """
+    Public channel message — clean signal, no bankroll.
+    Personal message — full details including bankroll + record.
+    """
     tier_emoji = {"full": "🔥", "half": "💪", "quarter": "📊"}.get(
         trade.get("kelly_tier", "").split("-")[0], "📊"
     )
@@ -92,23 +101,48 @@ def telegram_new_trade(trade, state):
     won_ct   = sum(1 for t in closed_t if t.get("won"))
     lost_ct  = len(closed_t) - won_ct
 
-    msg = (
+    # ── PUBLIC channel message — clean formatted signal ───
+    kelly_pct   = trade.get("kelly_tier", "").split("(")[-1].replace(")", "").strip()
+    profit_pct  = round((trade["potential_return"] / trade["stake"] - 1) * 100, 1) if trade["stake"] else 0
+    pos_emoji   = "✅" if trade["position"] == "YES" else "🔴"
+
+    public_msg = (
         f"🤖 <b>CLAUDEBOT SIGNAL</b>\n"
         f"{'─' * 30}\n"
-        f"{'✅' if trade['position'] == 'YES' else '🔴'} <b>BUY {trade['position']}</b>\n"
-        f"📋 {trade['market']}\n\n"
-        f"💰 Entry: <b>{trade['entry_price']}¢</b>  |  True prob: <b>{trade['true_prob']}%</b>\n"
-        f"📈 Edge: <b>+{edge}%</b>  |  Confidence: <b>{trade['confidence']}%</b>\n"
-        f"{tier_emoji} Sizing: <b>{trade.get('kelly_tier', '')}</b>\n"
-        f"💵 Stake: <b>${trade['stake']:.2f}</b>  →  Win: <b>${trade['potential_return']:.2f}</b>\n"
-        f"⏰ Closes: <b>{trade['closes'][:10]}</b> ({trade['closes_in_days']:.1f}d)\n\n"
-        f"🔍 <i>{trade.get('research_summary', '')}</i>\n\n"
-        f"⚠️ Bear case: {trade.get('bear_case', '')}\n"
+        f"<b>{trade['market']}</b>\n\n"
+        f"{pos_emoji} <b>BUY {trade['position']}</b>\n\n"
+        f"📌 Entry: <b>{trade['entry_price']}¢</b>\n"
+        f"🎯 Confidence: <b>{trade['confidence']}%</b>\n"
+        f"📐 Sizing: <b>{kelly_pct}</b>\n"
+        f"💹 Potential profit: <b>+{profit_pct}%</b>\n"
+        f"⏰ Closing: <b>{trade['closes'][:10]}</b>\n\n"
         f"{'─' * 30}\n"
-        f"🏦 Bankroll: <b>${state['bankroll']:.2f}</b> ({roi:+.1f}% ROI)\n"
-        f"📊 Record: <b>{won_ct}W / {lost_ct}L</b>"
+        f"🔍 <b>Reasoning</b>\n"
+        f"<i>{trade.get('research_summary', '')}</i>\n\n"
+        f"⚠️ <b>Bear case</b>\n"
+        f"<i>{trade.get('bear_case', '')}</i>"
     )
-    send_telegram(msg)
+    send_telegram(public_msg, TELEGRAM_CHANNEL_ID)
+
+    # ── PRIVATE message — full details ────────────────────
+    if TELEGRAM_PERSONAL_ID:
+        private_msg = (
+            f"🤖 <b>CLAUDEBOT — PRIVATE DETAILS</b>\n"
+            f"{'─' * 30}\n"
+            f"{'✅' if trade['position'] == 'YES' else '🔴'} <b>BUY {trade['position']}</b>\n"
+            f"📋 {trade['market']}\n\n"
+            f"💰 Entry: <b>{trade['entry_price']}¢</b>  |  True prob: <b>{trade['true_prob']}%</b>\n"
+            f"📈 Edge: <b>+{edge}%</b>  |  Confidence: <b>{trade['confidence']}%</b>\n"
+            f"{tier_emoji} Sizing: <b>{trade.get('kelly_tier', '')}</b>\n"
+            f"💵 Stake: <b>${trade['stake']:.2f}</b>  →  Win: <b>${trade['potential_return']:.2f}</b>\n"
+            f"⏰ Closes: <b>{trade['closes'][:10]}</b> ({trade['closes_in_days']:.1f}d)\n\n"
+            f"🔍 <i>{trade.get('research_summary', '')}</i>\n\n"
+            f"⚠️ Bear case: {trade.get('bear_case', '')}\n"
+            f"{'─' * 30}\n"
+            f"🏦 Bankroll: <b>${state['bankroll']:.2f}</b> ({roi:+.1f}% ROI)\n"
+            f"📊 Record: <b>{won_ct}W / {lost_ct}L</b>"
+        )
+        send_telegram(private_msg, TELEGRAM_PERSONAL_ID)
 
 
 def telegram_trade_resolved(trade, state):
@@ -123,17 +157,31 @@ def telegram_trade_resolved(trade, state):
     lost_ct = len(closed) - won_ct
     wr      = (won_ct / len(closed) * 100) if closed else 0
 
-    msg = (
+    # Public — no bankroll
+    public_msg = (
         f"{emoji} <b>TRADE RESOLVED — {result}</b>\n"
         f"{'─' * 30}\n"
         f"📋 {trade['market']}\n"
         f"Position: <b>{trade['position']} @ {trade['entry_price']}¢</b>\n\n"
         f"💰 P&L: <b>{pnl_str}</b>\n"
-        f"🏦 Bankroll: <b>${state['bankroll']:.2f}</b> ({roi:+.1f}% ROI)\n"
         f"{'─' * 30}\n"
         f"📊 Overall: <b>{won_ct}W / {lost_ct}L — {wr:.0f}% win rate</b>"
     )
-    send_telegram(msg)
+    send_telegram(public_msg, TELEGRAM_CHANNEL_ID)
+
+    # Private — with bankroll
+    if TELEGRAM_PERSONAL_ID:
+        private_msg = (
+            f"{emoji} <b>TRADE RESOLVED — {result}</b>\n"
+            f"{'─' * 30}\n"
+            f"📋 {trade['market']}\n"
+            f"Position: <b>{trade['position']} @ {trade['entry_price']}¢</b>\n\n"
+            f"💰 P&L: <b>{pnl_str}</b>\n"
+            f"🏦 Bankroll: <b>${state['bankroll']:.2f}</b> ({roi:+.1f}% ROI)\n"
+            f"{'─' * 30}\n"
+            f"📊 Overall: <b>{won_ct}W / {lost_ct}L — {wr:.0f}% win rate</b>"
+        )
+        send_telegram(private_msg, TELEGRAM_PERSONAL_ID)
 
 
 def telegram_daily_summary(state):
@@ -150,22 +198,43 @@ def telegram_daily_summary(state):
     for t in open_t:
         close_dt   = parse_utc(t.get("closes", ""))
         closes_str = close_dt.strftime("%b %d") if close_dt else "?"
-        positions_txt += f"  • {t['position']} | ${t['stake']:.2f} | {closes_str} | {t['market'][:45]}\n"
+        positions_txt += f"  • {t['position']} | {closes_str} | {t['market'][:45]}\n"
 
-    msg = (
+    # Public — no bankroll or stakes
+    public_msg = (
         f"📅 <b>CLAUDEBOT DAILY SUMMARY</b>\n"
         f"{'─' * 30}\n"
-        f"🏦 Bankroll: <b>${state['bankroll']:.2f}</b>\n"
-        f"📈 ROI: <b>{roi:+.1f}%</b>  |  Realized P&L: <b>${realized:+.2f}</b>\n"
         f"📊 Record: <b>{len(won_t)}W / {len(lost_t)}L — {win_rate:.0f}% win rate</b>\n"
-        f"🔄 Total Scans: <b>{state.get('scan_count', 0)}</b>\n"
         f"{'─' * 30}\n"
-        f"📋 Open Positions ({len(open_t)}/{MAX_OPEN_POSITIONS}):\n"
+        f"📋 Open Positions ({len(open_t)}):\n"
         + (positions_txt if positions_txt else "  None\n") +
         f"{'─' * 30}\n"
         f"⏰ Next scan in ~3 hours"
     )
-    send_telegram(msg)
+    send_telegram(public_msg, TELEGRAM_CHANNEL_ID)
+
+    # Private — full details
+    if TELEGRAM_PERSONAL_ID:
+        positions_full = ""
+        for t in open_t:
+            close_dt   = parse_utc(t.get("closes", ""))
+            closes_str = close_dt.strftime("%b %d") if close_dt else "?"
+            positions_full += f"  • {t['position']} | ${t['stake']:.2f} | {closes_str} | {t['market'][:45]}\n"
+
+        private_msg = (
+            f"📅 <b>CLAUDEBOT DAILY SUMMARY — PRIVATE</b>\n"
+            f"{'─' * 30}\n"
+            f"🏦 Bankroll: <b>${state['bankroll']:.2f}</b>\n"
+            f"📈 ROI: <b>{roi:+.1f}%</b>  |  Realized P&L: <b>${realized:+.2f}</b>\n"
+            f"📊 Record: <b>{len(won_t)}W / {len(lost_t)}L — {win_rate:.0f}% win rate</b>\n"
+            f"🔄 Total Scans: <b>{state.get('scan_count', 0)}</b>\n"
+            f"{'─' * 30}\n"
+            f"📋 Open Positions ({len(open_t)}/{MAX_OPEN_POSITIONS}):\n"
+            + (positions_full if positions_full else "  None\n") +
+            f"{'─' * 30}\n"
+            f"⏰ Next scan in ~3 hours"
+        )
+        send_telegram(private_msg, TELEGRAM_PERSONAL_ID)
 
 
 def should_send_daily_summary(state):
