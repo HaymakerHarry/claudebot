@@ -1,5 +1,5 @@
 {
-  "bankroll": 1282.46,
+  "bankroll": 1251.81,
   "trades": [
     {
       "id": "T1774412231",
@@ -201,10 +201,38 @@
       "won": false,
       "resolved_at": "2026-03-28T08:35:08.609888+00:00",
       "realized_pnl": -17.42
+    },
+    {
+      "id": "T1774754332",
+      "market_id": "1714977",
+      "market": "Will the highest temperature in Singapore be 32\u00b0C on March 29?",
+      "position": "YES",
+      "entry_price": 32,
+      "stake": 30.65,
+      "potential_return": 95.78,
+      "potential_profit": 65.13,
+      "confidence": 62,
+      "true_prob": 42,
+      "market_prob": 32,
+      "category": "weather",
+      "closes_in_days": 0.36,
+      "closes": "2026-03-29T12:00:00+00:00",
+      "research_summary": "Polymarket traders with $59K volume price 32\u00b0C at 55%, far above this market's 32%. Singapore Met forecasts afternoon thundery showers that would cap solar heating around 32\u00b0C. Climatological March average high is ~31.7\u00b0C and 2026 has been warmer-than-normal, but rain caps the upside. Recent highs hit 33\u00b0C on clear days.",
+      "key_factors": [
+        "Polymarket consensus at 55% vs this market at 32% \u2014 large cross-platform discrepancy",
+        "Singapore Met Service forecasts afternoon thunderstorms capping heating to 31-32\u00b0C range",
+        "Climatological March average ~31.7\u00b0C positions 32\u00b0C as the modal outcome in showery conditions"
+      ],
+      "bear_case": "If storms arrive late or are localized, temperature could peak at 33-34\u00b0C (like March 26), making exactly 32\u00b0C wrong; AccuWeather forecasts 93\u00b0F (34\u00b0C)",
+      "kelly_tier": "quarter-Kelly (3.0%)",
+      "status": "open",
+      "placed_at": "2026-03-29T03:18:52.160837+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
-  "daily_loss": 17.42,
-  "daily_reset": "2026-03-28",
-  "scan_count": 57,
+  "daily_loss": 0.0,
+  "daily_reset": "2026-03-29",
+  "scan_count": 58,
   "started": "2026-03-23T09:17:53.961678"
 }
