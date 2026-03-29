@@ -26,6 +26,8 @@ jobs:
       - name: Run bot (single scan)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
         run: python claudebot.py --single-scan
 
       - name: Commit updated log back to repo
