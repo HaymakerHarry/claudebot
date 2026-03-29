@@ -1,5 +1,5 @@
 {
-  "bankroll": 1005.03,
+  "bankroll": 974.88,
   "trades": [
     {
       "id": "T1774412231",
@@ -433,11 +433,39 @@
       "placed_at": "2026-03-29T17:06:05.660351+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1774810667",
+      "market_id": "1743078",
+      "market": "Trump approval Up or Down this week?",
+      "position": "NO",
+      "entry_price": 54,
+      "stake": 30.15,
+      "potential_return": 55.83,
+      "potential_profit": 25.68,
+      "confidence": 68,
+      "true_prob": 32,
+      "market_prob": 46,
+      "category": "politics",
+      "closes_in_days": 5.21,
+      "closes": "2026-04-04T00:00:00+00:00",
+      "research_summary": "Reuters/Ipsos (March 24) recorded 36% approval, down 4 points from 40% the prior week. Other polls confirm the trend: 37% (Gelliott Morris), 38% (Economist/YouGov). Disapproval has reached 60%, driven by fuel price surges amid the Iran conflict.",
+      "key_factors": [
+        "Sharp 4-point weekly decline from 40% to 36% shows strong downward momentum",
+        "Structural drivers (Iran conflict, fuel prices) are ongoing with no near-term resolution expected",
+        "Multiple independent polls converge on 36-38% range confirming trend is real, not noise"
+      ],
+      "bear_case": "Approval at historic lows could trigger mean reversion; a positive news event or de-escalation with Iran could produce a small bounce; the specific tracker used for resolution may differ from polls cited",
+      "kelly_tier": "quarter-Kelly (3.0%)",
+      "status": "open",
+      "placed_at": "2026-03-29T18:57:47.026080+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 36.5,
   "daily_reset": "2026-03-29",
-  "scan_count": 72,
+  "scan_count": 73,
   "started": "2026-03-23T09:17:53.961678",
   "last_daily_summary": "2026-03-29"
 }
