@@ -2,12 +2,13 @@
 ╔══════════════════════════════════════════════════════════╗
 ║         CLAUDEBOT v7 — Polymarket Paper Trader           ║
 ║                                                          ║
-║  New in v7:                                              ║
+║  Fixes in this version:                                  ║
+║  • NO bet Kelly sizing fixed (probabilities inverted)    ║
+║  • Web search now mandatory for weather + sports         ║
 ║  • Telegram signal channel integration                   ║
-║  • Fires on every new bet placed                         ║
-║  • Fires on every win/loss resolution                    ║
-║  • Daily 9am UTC summary message                        ║
-║  • Run frequency: every 3 hours                          ║
+║  • Confidence-tiered Kelly sizing                        ║
+║  • 10 positions, max 2 per category                      ║
+║  • Runs every 3 hours via GitHub Actions                 ║
 ║                                                          ║
 ║  SETUP:  pip install anthropic requests                  ║
 ║  RUN:    python claudebot.py --single-scan               ║
@@ -42,7 +43,7 @@ MAX_OPEN_POSITIONS = 10
 MAX_HOLD_DAYS      = 7
 MIN_HOLD_HOURS     = 2
 DAILY_LOSS_LIMIT   = 200.00
-SCAN_INTERVAL_MINS = 180       # 3 hours in continuous mode
+SCAN_INTERVAL_MINS = 180
 SCREENER_TOP_N     = 10
 LOG_FILE           = "claudebot_log.json"
 
@@ -68,16 +69,11 @@ def log(msg):
 # ─────────────────────────────────────────────────────────
 
 def send_telegram(msg):
-    """Send a message to the Telegram channel. Silently fails if not configured."""
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
         return
     try:
         url  = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        data = {
-            "chat_id":    TELEGRAM_CHANNEL_ID,
-            "text":       msg,
-            "parse_mode": "HTML",
-        }
+        data = {"chat_id": TELEGRAM_CHANNEL_ID, "text": msg, "parse_mode": "HTML"}
         r = requests.post(url, json=data, timeout=10)
         if r.status_code == 200:
             log("📨 Telegram sent")
@@ -93,11 +89,14 @@ def telegram_new_trade(trade, state):
     )
     edge = abs(trade.get("true_prob", 0) - trade.get("market_prob", 0))
     roi  = (state["bankroll"] - STARTING_BANKROLL) / STARTING_BANKROLL * 100
+    won_ct  = sum(1 for t in state["trades"] if t.get("won"))
+    closed_ct = sum(1 for t in state["trades"] if t["status"] == "closed")
+    lost_ct = closed_ct - won_ct
 
     msg = (
         f"🤖 <b>CLAUDEBOT SIGNAL</b>\n"
         f"{'─' * 30}\n"
-        f"{'✅' if trade['position'] == 'YES' else '❌'} <b>BUY {trade['position']}</b>\n"
+        f"{'✅' if trade['position'] == 'YES' else '🔴'} <b>BUY {trade['position']}</b>\n"
         f"📋 {trade['market']}\n\n"
         f"💰 Entry: <b>{trade['entry_price']}¢</b>  |  True prob: <b>{trade['true_prob']}%</b>\n"
         f"📈 Edge: <b>+{edge}%</b>  |  Confidence: <b>{trade['confidence']}%</b>\n"
@@ -108,8 +107,7 @@ def telegram_new_trade(trade, state):
         f"⚠️ Bear case: {trade.get('bear_case', '')}\n"
         f"{'─' * 30}\n"
         f"🏦 Bankroll: <b>${state['bankroll']:.2f}</b> ({roi:+.1f}% ROI)\n"
-        f"📊 Record: <b>{sum(1 for t in state['trades'] if t.get('won'))}W "
-        f"/ {sum(1 for t in state['trades'] if t['status']=='closed' and not t.get('won'))}L</b>"
+        f"📊 Record: <b>{won_ct}W / {lost_ct}L</b>"
     )
     send_telegram(msg)
 
@@ -121,7 +119,6 @@ def telegram_trade_resolved(trade, state):
     pnl     = trade.get("realized_pnl", 0)
     pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"-${abs(pnl):.2f}"
     roi     = (state["bankroll"] - STARTING_BANKROLL) / STARTING_BANKROLL * 100
-
     closed  = [t for t in state["trades"] if t["status"] == "closed"]
     won_ct  = sum(1 for t in closed if t.get("won"))
     lost_ct = len(closed) - won_ct
@@ -165,7 +162,7 @@ def telegram_daily_summary(state):
         f"🔄 Total Scans: <b>{state.get('scan_count', 0)}</b>\n"
         f"{'─' * 30}\n"
         f"📋 Open Positions ({len(open_t)}/{MAX_OPEN_POSITIONS}):\n"
-        f"{positions_txt if positions_txt else '  None'}\n"
+        + (positions_txt if positions_txt else "  None\n") +
         f"{'─' * 30}\n"
         f"⏰ Next scan in ~3 hours"
     )
@@ -173,11 +170,9 @@ def telegram_daily_summary(state):
 
 
 def should_send_daily_summary(state):
-    """Send daily summary once per day around 9am UTC."""
     now   = datetime.now(timezone.utc)
     today = now.strftime("%Y-%m-%d")
-    last  = state.get("last_daily_summary", "")
-    if last == today:
+    if state.get("last_daily_summary", "") == today:
         return False
     if now.hour == 9:
         state["last_daily_summary"] = today
@@ -434,9 +429,20 @@ Return ONLY a JSON array, no other text:
 
 # ─────────────────────────────────────────────────────────
 #  KELLY SIZING  ·  confidence-tiered
+#  FIX: probabilities are always from the perspective of
+#  the position being taken (YES or NO), not always YES
 # ─────────────────────────────────────────────────────────
 
 def kelly_size(true_prob_pct, market_prob_pct, bankroll, closes_in_days=7.0, confidence=70):
+    """
+    true_prob_pct and market_prob_pct must both be expressed from
+    the perspective of the position being taken.
+
+    For YES bets: pass true_prob and market_prob directly.
+    For NO bets: pass (100 - true_prob) and (100 - market_prob).
+
+    This is handled in place_paper_trade before calling this function.
+    """
     if not (0 < market_prob_pct < 100) or not (0 < true_prob_pct < 100):
         return 0.0
 
@@ -486,15 +492,15 @@ def get_category(question):
     q = question.lower()
     if any(k in q for k in ["temperature", "weather", "rain", "snow", "°c", "°f", "celsius", "fahrenheit"]):
         return "weather"
-    if any(k in q for k in ["bitcoin", "btc", "ethereum", "eth", "crypto", "solana", "defi"]):
+    if any(k in q for k in ["bitcoin", "btc", "ethereum", "eth", "crypto", "solana", "defi", "bnb", "xrp"]):
         return "crypto"
-    if any(k in q for k in ["nba", "nfl", "mlb", "nhl", "soccer", "football", "tennis", "golf", "points", "goals", "score", "match", "game", "fc ", " united", "spread", "o/u"]):
+    if any(k in q for k in ["nba", "nfl", "mlb", "nhl", "soccer", "football", "tennis", "golf", "points", "goals", "score", "match", "game", "fc ", " united", "spread", "o/u", "rebounds", "assists", "flyers", "lakers", "celtics", "esport", "valorant", "counter-strike", "leverkusen", "barcelona", "atletico"]):
         return "sports"
-    if any(k in q for k in ["president", "election", "senate", "congress", "vote", "government", "minister", "party", "trump", "biden", "democrat", "republican"]):
+    if any(k in q for k in ["president", "election", "senate", "congress", "vote", "government", "minister", "party", "trump", "biden", "democrat", "republican", "musk", "tweets"]):
         return "politics"
-    if any(k in q for k in ["fed", "rate", "inflation", "gdp", "recession", "unemployment", "economy", "s&p", "nasdaq", "dow"]):
+    if any(k in q for k in ["fed", "rate", "inflation", "gdp", "recession", "unemployment", "economy", "s&p", "nasdaq", "dow", "jobs", "robinhood", "hood", "amazon", "amzn"]):
         return "economics"
-    if any(k in q for k in ["war", "military", "attack", "ceasefire", "hezbollah", "ukraine", "russia", "israel", "hamas", "conflict"]):
+    if any(k in q for k in ["war", "military", "attack", "ceasefire", "hezbollah", "ukraine", "russia", "israel", "hamas", "conflict", "kyiv", "kostyantynivka"]):
         return "geopolitics"
     return "other"
 
@@ -507,6 +513,7 @@ def category_slots_available(category, state):
 
 # ─────────────────────────────────────────────────────────
 #  STAGE 2 — OPUS 4.6 DEEP ANALYST
+#  FIX: web_search is now mandatory for weather + sports
 # ─────────────────────────────────────────────────────────
 
 def opus_analyze(markets, state):
@@ -568,22 +575,29 @@ MIN EDGE: {MIN_EDGE_PCT}% | MIN CONFIDENCE: {MIN_CONFIDENCE}%
 CANDIDATE MARKETS (all close within {MAX_HOLD_DAYS} days):
 {mkt_list}
 
-PROCESS:
-1. Use web_search to find SPECIFIC, CURRENT data for each promising market
-2. Estimate true probability using base rates, current evidence, momentum, crowd bias
-3. Only recommend if genuine edge >= {MIN_EDGE_PCT}% after research
+MANDATORY RESEARCH RULES — you MUST use web_search before deciding on any market:
+  • Weather markets: search the EXACT city + date forecast right now (e.g. "Denver weather March 29 2026 high temperature forecast"). Do NOT guess from training data — forecasts change hourly.
+  • Sports markets: search current scores, player stats, injury reports, recent form.
+  • Crypto price markets: search current price and 24h trend.
+  • All others: search for the most recent relevant news or data.
+
+You MUST run at least one web_search per promising market before recommending it.
+If you cannot find current data to support a recommendation, do NOT recommend that market.
 
 CONFIDENCE GUIDE — be honest and calibrated:
-  90-99%: Near-certain. Verified specific evidence (confirmed withdrawal,
-          real-time stats showing outcome essentially decided)
-  75-89%: High confidence. Strong evidence pointing clearly one way
-  60-74%: Moderate confidence. Edge exists but meaningful uncertainty remains
+  90-99%: Near-certain. Verified specific real-time evidence.
+  75-89%: High confidence. Strong current evidence pointing clearly one way.
+  60-74%: Moderate confidence. Edge exists but meaningful uncertainty remains.
+
+KELLY SIZING NOTE — NO BETS:
+  When recommending BUY NO, your true_prob and market_prob should reflect the
+  probability of NO happening (i.e. true_prob = 100 - your YES estimate).
+  Example: if you think YES has 12% true probability and market says 32%,
+  then for a NO bet: true_prob=88, market_prob=68.
 
 DIVERSIFICATION RULE — STRICT:
-  Max {MAX_PER_CATEGORY} open positions per category
-  Do NOT recommend a 3rd in any category already at {MAX_PER_CATEGORY}
-
-NOTE: Do NOT include size_pct — sizing is handled automatically by confidence tier.
+  Max {MAX_PER_CATEGORY} open positions per category.
+  Do NOT recommend a 3rd in any category already at {MAX_PER_CATEGORY}.
 
 Return ONLY a valid JSON array, no other text:
 [
@@ -591,11 +605,11 @@ Return ONLY a valid JSON array, no other text:
     "market_id": "exact ID from list",
     "market": "exact question text",
     "position": "YES or NO",
-    "market_prob": 48,
-    "true_prob": 63,
-    "confidence": 74,
-    "category": "sports",
-    "research_summary": "2-3 sentences: specific data found and why it gives edge",
+    "market_prob": 32,
+    "true_prob": 88,
+    "confidence": 88,
+    "category": "weather",
+    "research_summary": "2-3 sentences: specific current data found and why it gives edge",
     "key_factors": ["specific factor 1", "specific factor 2", "specific factor 3"],
     "bear_case": "main reason you could be wrong"
   }}
@@ -675,6 +689,7 @@ If no genuine edge found after research, return: []"""
 
 # ─────────────────────────────────────────────────────────
 #  TRADE EXECUTION
+#  FIX: Kelly probabilities flipped correctly for NO bets
 # ─────────────────────────────────────────────────────────
 
 def place_paper_trade(rec, markets, state):
@@ -715,16 +730,26 @@ def place_paper_trade(rec, markets, state):
         log(f"  ⏭  Closes in {cid:.1f}d — outside window")
         return state
 
+    # ── Kelly fix: use position-adjusted probabilities ──────
+    # For YES: bet wins if YES happens → use true_prob and market_prob directly
+    # For NO:  bet wins if NO happens  → invert both probabilities
+    if rec["position"] == "YES":
+        kelly_true   = rec["true_prob"]
+        kelly_market = rec["market_prob"]
+    else:
+        kelly_true   = 100 - rec["true_prob"]
+        kelly_market = 100 - rec["market_prob"]
+
     stake = kelly_size(
-        true_prob_pct   = rec["true_prob"],
-        market_prob_pct = rec["market_prob"],
+        true_prob_pct   = kelly_true,
+        market_prob_pct = kelly_market,
         bankroll        = state["bankroll"],
         closes_in_days  = cid,
         confidence      = conf
     )
 
     if stake < 1.00:
-        log(f"  ⏭  Stake ${stake:.2f} too small")
+        log(f"  ⏭  Stake ${stake:.2f} too small (kelly_true={kelly_true}% kelly_market={kelly_market}%)")
         return state
 
     tier   = get_tier_name(conf)
@@ -827,7 +852,6 @@ def single_scan():
     state = reset_daily_loss(state)
     state["scan_count"] = state.get("scan_count", 0) + 1
 
-    # Daily summary at 9am UTC
     if should_send_daily_summary(state):
         telegram_daily_summary(state)
 
