@@ -1,15 +1,14 @@
 """
 ╔══════════════════════════════════════════════════════════╗
-║         CLAUDEBOT v9 — Polymarket Paper Trader           ║
+║         CLAUDEBOT v10 — Polymarket Paper Trader          ║
 ║                                                          ║
-║  New in v9:                                              ║
-║  • Guaranteed web research — Haiku searches each market  ║
-║    individually before Opus sees any of them             ║
-║  • Each market gets its own dedicated search call        ║
-║  • Research results injected into Opus prompt as facts   ║
-║  • Opus makes decisions based on real current data       ║
+║  Research pipeline:                                      ║
+║  1. Python searches DuckDuckGo for each market           ║
+║     → guaranteed real data, no AI deciding to skip       ║
+║  2. Haiku reads raw results → writes clean research brief ║
+║  3. Opus reads briefs → makes trading decisions          ║
 ║                                                          ║
-║  SETUP:  pip install anthropic requests                  ║
+║  SETUP:  pip install anthropic requests duckduckgo-search ║
 ║  RUN:    python claudebot.py --single-scan               ║
 ╚══════════════════════════════════════════════════════════╝
 """
@@ -23,6 +22,12 @@ import requests
 from datetime import datetime, timezone, timedelta
 import anthropic
 
+try:
+    from duckduckgo_search import DDGS
+    DDG_AVAILABLE = True
+except ImportError:
+    DDG_AVAILABLE = False
+
 # ─────────────────────────────────────────────────────────
 #  CONFIG
 # ─────────────────────────────────────────────────────────
@@ -30,7 +35,7 @@ import anthropic
 ANTHROPIC_API_KEY    = os.environ.get("ANTHROPIC_API_KEY", "")
 TELEGRAM_BOT_TOKEN   = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHANNEL_ID  = os.environ.get("TELEGRAM_CHANNEL_ID", "")
-TELEGRAM_PERSONAL_ID = os.environ.get("TELEGRAM_PERSONAL_ID", "")  # your personal chat ID
+TELEGRAM_PERSONAL_ID = os.environ.get("TELEGRAM_PERSONAL_ID", "")
 
 SCREENER_MODEL     = "claude-haiku-4-5-20251001"
 ANALYST_MODEL      = "claude-opus-4-6"
@@ -69,7 +74,6 @@ def log(msg):
 # ─────────────────────────────────────────────────────────
 
 def send_telegram(msg, chat_id=None):
-    """Send to a specific chat_id, or default channel if not specified."""
     if not TELEGRAM_BOT_TOKEN:
         return
     target = chat_id or TELEGRAM_CHANNEL_ID
@@ -80,32 +84,24 @@ def send_telegram(msg, chat_id=None):
         data = {"chat_id": target, "text": msg, "parse_mode": "HTML"}
         r    = requests.post(url, json=data, timeout=10)
         if r.status_code == 200:
-            log(f"📨 Telegram sent → {target}")
+            log(f"📨 Telegram → {target}")
         else:
-            log(f"⚠️  Telegram error: {r.status_code} — {r.text[:100]}")
+            log(f"⚠️  Telegram error {r.status_code}: {r.text[:100]}")
     except Exception as e:
         log(f"⚠️  Telegram failed: {e}")
 
 
 def telegram_new_trade(trade, state):
-    """
-    Public channel message — clean signal, no bankroll.
-    Personal message — full details including bankroll + record.
-    """
-    tier_emoji = {"full": "🔥", "half": "💪", "quarter": "📊"}.get(
-        trade.get("kelly_tier", "").split("-")[0], "📊"
-    )
-    edge     = abs(trade.get("true_prob", 0) - trade.get("market_prob", 0))
-    roi      = (state["bankroll"] - STARTING_BANKROLL) / STARTING_BANKROLL * 100
-    closed_t = [t for t in state["trades"] if t["status"] == "closed"]
-    won_ct   = sum(1 for t in closed_t if t.get("won"))
-    lost_ct  = len(closed_t) - won_ct
+    kelly_pct  = trade.get("kelly_tier", "").split("(")[-1].replace(")", "").strip()
+    profit_pct = round((trade["potential_return"] / trade["stake"] - 1) * 100, 1) if trade["stake"] else 0
+    pos_emoji  = "✅" if trade["position"] == "YES" else "🔴"
+    edge       = abs(trade.get("true_prob", 0) - trade.get("market_prob", 0))
+    roi        = (state["bankroll"] - STARTING_BANKROLL) / STARTING_BANKROLL * 100
+    closed_t   = [t for t in state["trades"] if t["status"] == "closed"]
+    won_ct     = sum(1 for t in closed_t if t.get("won"))
+    lost_ct    = len(closed_t) - won_ct
 
-    # ── PUBLIC channel message — clean formatted signal ───
-    kelly_pct   = trade.get("kelly_tier", "").split("(")[-1].replace(")", "").strip()
-    profit_pct  = round((trade["potential_return"] / trade["stake"] - 1) * 100, 1) if trade["stake"] else 0
-    pos_emoji   = "✅" if trade["position"] == "YES" else "🔴"
-
+    # ── PUBLIC — clean signal, no financials ──────────────
     public_msg = (
         f"🤖 <b>CLAUDEBOT SIGNAL</b>\n"
         f"{'─' * 30}\n"
@@ -124,20 +120,24 @@ def telegram_new_trade(trade, state):
     )
     send_telegram(public_msg, TELEGRAM_CHANNEL_ID)
 
-    # ── PRIVATE message — full details ────────────────────
+    # ── PRIVATE — full details with bankroll ──────────────
     if TELEGRAM_PERSONAL_ID:
+        tier_emoji = {"full": "🔥", "half": "💪", "quarter": "📊"}.get(
+            trade.get("kelly_tier", "").split("-")[0], "📊"
+        )
         private_msg = (
-            f"🤖 <b>CLAUDEBOT — PRIVATE DETAILS</b>\n"
+            f"🤖 <b>CLAUDEBOT — PRIVATE</b>\n"
             f"{'─' * 30}\n"
-            f"{'✅' if trade['position'] == 'YES' else '🔴'} <b>BUY {trade['position']}</b>\n"
-            f"📋 {trade['market']}\n\n"
+            f"<b>{trade['market']}</b>\n\n"
+            f"{pos_emoji} <b>BUY {trade['position']}</b>\n\n"
             f"💰 Entry: <b>{trade['entry_price']}¢</b>  |  True prob: <b>{trade['true_prob']}%</b>\n"
             f"📈 Edge: <b>+{edge}%</b>  |  Confidence: <b>{trade['confidence']}%</b>\n"
-            f"{tier_emoji} Sizing: <b>{trade.get('kelly_tier', '')}</b>\n"
+            f"{tier_emoji} {trade.get('kelly_tier', '')}\n"
             f"💵 Stake: <b>${trade['stake']:.2f}</b>  →  Win: <b>${trade['potential_return']:.2f}</b>\n"
+            f"💹 Profit if wins: <b>+{profit_pct}%</b>\n"
             f"⏰ Closes: <b>{trade['closes'][:10]}</b> ({trade['closes_in_days']:.1f}d)\n\n"
             f"🔍 <i>{trade.get('research_summary', '')}</i>\n\n"
-            f"⚠️ Bear case: {trade.get('bear_case', '')}\n"
+            f"⚠️ Bear: <i>{trade.get('bear_case', '')}</i>\n"
             f"{'─' * 30}\n"
             f"🏦 Bankroll: <b>${state['bankroll']:.2f}</b> ({roi:+.1f}% ROI)\n"
             f"📊 Record: <b>{won_ct}W / {lost_ct}L</b>"
@@ -161,11 +161,11 @@ def telegram_trade_resolved(trade, state):
     public_msg = (
         f"{emoji} <b>TRADE RESOLVED — {result}</b>\n"
         f"{'─' * 30}\n"
-        f"📋 {trade['market']}\n"
+        f"<b>{trade['market']}</b>\n"
         f"Position: <b>{trade['position']} @ {trade['entry_price']}¢</b>\n\n"
         f"💰 P&L: <b>{pnl_str}</b>\n"
         f"{'─' * 30}\n"
-        f"📊 Overall: <b>{won_ct}W / {lost_ct}L — {wr:.0f}% win rate</b>"
+        f"📊 Record: <b>{won_ct}W / {lost_ct}L — {wr:.0f}% win rate</b>"
     )
     send_telegram(public_msg, TELEGRAM_CHANNEL_ID)
 
@@ -174,12 +174,12 @@ def telegram_trade_resolved(trade, state):
         private_msg = (
             f"{emoji} <b>TRADE RESOLVED — {result}</b>\n"
             f"{'─' * 30}\n"
-            f"📋 {trade['market']}\n"
+            f"<b>{trade['market']}</b>\n"
             f"Position: <b>{trade['position']} @ {trade['entry_price']}¢</b>\n\n"
             f"💰 P&L: <b>{pnl_str}</b>\n"
             f"🏦 Bankroll: <b>${state['bankroll']:.2f}</b> ({roi:+.1f}% ROI)\n"
             f"{'─' * 30}\n"
-            f"📊 Overall: <b>{won_ct}W / {lost_ct}L — {wr:.0f}% win rate</b>"
+            f"📊 Record: <b>{won_ct}W / {lost_ct}L — {wr:.0f}% win rate</b>"
         )
         send_telegram(private_msg, TELEGRAM_PERSONAL_ID)
 
@@ -194,43 +194,37 @@ def telegram_daily_summary(state):
     win_rate = (len(won_t) / len(closed_t) * 100) if closed_t else 0
     roi      = (state["bankroll"] - STARTING_BANKROLL) / STARTING_BANKROLL * 100
 
-    positions_txt = ""
+    pos_public = ""
+    pos_private = ""
     for t in open_t:
         close_dt   = parse_utc(t.get("closes", ""))
         closes_str = close_dt.strftime("%b %d") if close_dt else "?"
-        positions_txt += f"  • {t['position']} | {closes_str} | {t['market'][:45]}\n"
+        pos_public  += f"  • {t['position']} | {closes_str} | {t['market'][:45]}\n"
+        pos_private += f"  • {t['position']} | ${t['stake']:.2f} | {closes_str} | {t['market'][:45]}\n"
 
-    # Public — no bankroll or stakes
     public_msg = (
         f"📅 <b>CLAUDEBOT DAILY SUMMARY</b>\n"
         f"{'─' * 30}\n"
         f"📊 Record: <b>{len(won_t)}W / {len(lost_t)}L — {win_rate:.0f}% win rate</b>\n"
         f"{'─' * 30}\n"
         f"📋 Open Positions ({len(open_t)}):\n"
-        + (positions_txt if positions_txt else "  None\n") +
+        + (pos_public if pos_public else "  None\n") +
         f"{'─' * 30}\n"
         f"⏰ Next scan in ~3 hours"
     )
     send_telegram(public_msg, TELEGRAM_CHANNEL_ID)
 
-    # Private — full details
     if TELEGRAM_PERSONAL_ID:
-        positions_full = ""
-        for t in open_t:
-            close_dt   = parse_utc(t.get("closes", ""))
-            closes_str = close_dt.strftime("%b %d") if close_dt else "?"
-            positions_full += f"  • {t['position']} | ${t['stake']:.2f} | {closes_str} | {t['market'][:45]}\n"
-
         private_msg = (
             f"📅 <b>CLAUDEBOT DAILY SUMMARY — PRIVATE</b>\n"
             f"{'─' * 30}\n"
             f"🏦 Bankroll: <b>${state['bankroll']:.2f}</b>\n"
             f"📈 ROI: <b>{roi:+.1f}%</b>  |  Realized P&L: <b>${realized:+.2f}</b>\n"
             f"📊 Record: <b>{len(won_t)}W / {len(lost_t)}L — {win_rate:.0f}% win rate</b>\n"
-            f"🔄 Total Scans: <b>{state.get('scan_count', 0)}</b>\n"
+            f"🔄 Scans: <b>{state.get('scan_count', 0)}</b>\n"
             f"{'─' * 30}\n"
             f"📋 Open Positions ({len(open_t)}/{MAX_OPEN_POSITIONS}):\n"
-            + (positions_full if positions_full else "  None\n") +
+            + (pos_private if pos_private else "  None\n") +
             f"{'─' * 30}\n"
             f"⏰ Next scan in ~3 hours"
         )
@@ -491,83 +485,133 @@ Return ONLY a JSON array, no other text:
         return top_markets
 
     except Exception as e:
-        log(f"⚠️  Haiku screener error ({e}) — passing all to Opus")
+        log(f"⚠️  Haiku screener error ({e}) — passing all to research")
         return candidates[:SCREENER_TOP_N]
 
 
 # ─────────────────────────────────────────────────────────
-#  STAGE 2 — HAIKU RESEARCHER
-#  Each market gets its own dedicated search call.
-#  Haiku searches, extracts facts, returns a research brief.
+#  STAGE 2a — PYTHON DDG SEARCH (guaranteed real data)
 # ─────────────────────────────────────────────────────────
 
-def research_market(client, market):
-    """
-    Uses Haiku with web_search to research a single market.
-    Returns a string of research findings.
-    """
+def build_search_query(market):
+    """Build a smart search query from the market question."""
     q   = market["question"]
-    yes = market["yes"]
-    cid = market["closes_in_days"]
+    now = datetime.now(timezone.utc)
+
+    # Strip common prediction market prefixes
+    q = re.sub(r'^Will\s+', '', q, flags=re.IGNORECASE)
+    q = re.sub(r'\?$', '', q).strip()
+
+    # Add date context for time-sensitive markets
+    date_str = now.strftime("%B %d %Y")
+    return f"{q} {date_str}"
+
+
+def ddg_search(query, max_results=4):
+    """Search DuckDuckGo and return raw results."""
+    if not DDG_AVAILABLE:
+        return []
+    try:
+        with DDGS() as ddgs:
+            results = list(ddgs.text(query, max_results=max_results))
+        return results
+    except Exception as e:
+        log(f"     ⚠️  DDG search failed: {e}")
+        return []
+
+
+def search_market(market):
+    """
+    Search DuckDuckGo for a market and return raw search data.
+    Returns list of {title, body, href} dicts.
+    """
+    query   = build_search_query(market)
+    results = ddg_search(query)
+    log(f"     🔍 Searched: \"{query}\" → {len(results)} results")
+    return query, results
+
+
+# ─────────────────────────────────────────────────────────
+#  STAGE 2b — HAIKU INTERPRETER
+#  Reads raw DDG results and writes a clean research brief
+# ─────────────────────────────────────────────────────────
+
+def haiku_interpret(client, market, query, raw_results):
+    """
+    Haiku reads the raw search results and distills them into
+    a clean, factual research brief for Opus to use.
+    """
+    if not raw_results:
+        return f"No search results found for: {query}"
+
+    results_txt = "\n\n".join(
+        f"Source: {r.get('href', '')}\nTitle: {r.get('title', '')}\nSnippet: {r.get('body', '')}"
+        for r in raw_results[:4]
+    )
 
     prompt = (
-        f"Research this prediction market for a trader: \"{q}\"\n\n"
-        f"Current market odds: YES={yes}¢ NO={100-yes}¢ | Closes in {cid:.1f} days\n"
+        f"You are a research analyst. Read these search results and write a concise factual brief.\n\n"
+        f"Market question: \"{market['question']}\"\n"
+        f"Current market odds: YES={market['yes']}¢ NO={100-market['yes']}¢\n"
+        f"Closes in: {market['closes_in_days']:.1f} days\n"
         f"Today: {datetime.now(timezone.utc).strftime('%A %B %d %Y %H:%M UTC')}\n\n"
-        f"Search for the most current relevant data:\n"
-        f"- For weather: search exact city + date forecast right now\n"
-        f"- For sports: search current scores, stats, injury reports\n"
-        f"- For crypto: search current price and recent movement\n"
-        f"- For geopolitics/news: search latest developments\n"
-        f"- For economic data: search latest figures and forecasts\n\n"
-        f"Return a concise factual brief (3-5 sentences) of what you found "
-        f"and what it implies for the YES/NO outcome. Be specific with numbers and dates."
+        f"SEARCH RESULTS:\n{results_txt}\n\n"
+        f"Write a 3-5 sentence factual brief covering:\n"
+        f"- Key current facts relevant to this market\n"
+        f"- What the data implies for YES vs NO\n"
+        f"- Any specific numbers, dates, or quotes from the results\n\n"
+        f"Be concise and factual. Only include information from the search results above."
     )
 
     try:
         resp = client.messages.create(
             model=SCREENER_MODEL,
-            max_tokens=1000,
-            tools=[{"type": "web_search_20250305", "name": "web_search"}],
+            max_tokens=500,
             messages=[{"role": "user", "content": prompt}]
         )
-
-        searches = 0
-        brief    = ""
-
-        for block in resp.content:
-            if hasattr(block, "type"):
-                if block.type == "tool_use" and block.name == "web_search":
-                    searches += 1
-                    log(f"     🔍 [{market['id']}] Searched: \"{block.input.get('query', '')}\"")
-                elif block.type == "text":
-                    brief += block.text
-
-        if searches == 0:
-            log(f"     ⚠️  [{market['id']}] No searches — using training data")
-
-        return brief.strip() if brief.strip() else "No research data available."
-
+        return resp.content[0].text.strip()
     except Exception as e:
-        log(f"     ⚠️  Research error for {market['id']}: {e}")
-        return "Research failed — no data available."
+        return f"Interpretation failed: {e}. Raw data: {results_txt[:300]}"
 
+
+# ─────────────────────────────────────────────────────────
+#  STAGE 2 — FULL RESEARCH PIPELINE
+#  Python searches → Haiku interprets → research briefs
+# ─────────────────────────────────────────────────────────
 
 def research_all_markets(markets):
     """
-    Researches each market individually using Haiku + web search.
-    Returns a dict of market_id -> research brief.
+    For each market:
+    1. Python searches DuckDuckGo (guaranteed, no AI involved)
+    2. Haiku reads results and writes a clean brief
+    Returns dict of market_id -> research brief
     """
     client   = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     research = {}
 
-    log(f"🔬 Researching {len(markets)} markets individually...")
+    if not DDG_AVAILABLE:
+        log("⚠️  duckduckgo-search not installed — skipping research")
+        for m in markets:
+            research[m["id"]] = "No research available (duckduckgo-search not installed)."
+        return research
+
+    log(f"🔬 Researching {len(markets)} markets (Python DDG + Haiku interpret)...")
 
     for i, market in enumerate(markets):
-        log(f"  [{i+1}/{len(markets)}] Researching: {market['question'][:60]}")
-        brief = research_market(client, market)
+        log(f"  [{i+1}/{len(markets)}] {market['question'][:65]}")
+
+        # Step 1: Python searches DDG
+        query, raw_results = search_market(market)
+
+        # Step 2: Haiku interprets results
+        if raw_results:
+            brief = haiku_interpret(client, market, query, raw_results)
+            log(f"     📋 {brief[:100]}...")
+        else:
+            brief = f"No search results found. Market: {market['question']}"
+            log(f"     ⚠️  No results — proceeding without research data")
+
         research[market["id"]] = brief
-        log(f"     📋 Brief: {brief[:100]}...")
 
     return research
 
@@ -632,8 +676,8 @@ def get_category(question):
                               "points", "goals", "score", "match", "game", "fc ", " united",
                               "spread", "o/u", "rebounds", "assists", "esport", "valorant",
                               "counter-strike", "leverkusen", "barcelona", "atletico", "flyers",
-                              "capitals", "lakers", "celtics", "lithuania", "almeria", "stars",
-                              "west brom", "wrexham", "jokic", "harris", "molcan"]):
+                              "capitals", "lakers", "celtics", "west brom", "wrexham", "dota",
+                              "honduras", "jokic", "harris", "molcan", "kills", "bestia"]):
         return "sports"
     if any(k in q for k in ["president", "election", "senate", "congress", "vote", "government",
                               "minister", "party", "trump", "biden", "democrat", "republican",
@@ -658,7 +702,7 @@ def category_slots_available(category, state):
 
 # ─────────────────────────────────────────────────────────
 #  STAGE 3 — OPUS 4.6 ANALYST
-#  Receives pre-researched data and makes trading decisions
+#  Receives pre-researched briefs and makes decisions
 # ─────────────────────────────────────────────────────────
 
 def opus_analyze(markets, research, state):
@@ -703,15 +747,15 @@ def opus_analyze(markets, research, state):
             cat_counts[cat] = cat_counts.get(cat, 0) + 1
         open_ctx += f"\n\nCATEGORY COUNTS: {cat_counts} | MAX PER CATEGORY: {MAX_PER_CATEGORY}"
 
-    # Build market list with embedded research
+    # Markets with embedded research briefs
     mkt_sections = []
     for m in markets:
         brief = research.get(m["id"], "No research available.")
         section = (
-            f"ID:{m['id']} | Closes {m['closes'][:10]} ({m['closes_in_days']:.1f}d) | "
-            f"YES={m['yes']}¢ NO={100-m['yes']}¢ | Vol=${m['volume']:,.0f}\n"
+            f"─── MARKET ID:{m['id']} ───\n"
             f"Question: \"{m['question']}\"\n"
-            f"Research: {brief}\n"
+            f"Odds: YES={m['yes']}¢ NO={100-m['yes']}¢ | Vol=${m['volume']:,.0f} | Closes {m['closes'][:10]} ({m['closes_in_days']:.1f}d)\n"
+            f"Research (from live web search): {brief}\n"
         )
         mkt_sections.append(section)
 
@@ -724,19 +768,19 @@ def opus_analyze(markets, research, state):
         f"MIN EDGE: {MIN_EDGE_PCT}% | MIN CONFIDENCE: {MIN_CONFIDENCE}%\n"
         f"{history_ctx}\n"
         f"{open_ctx}\n\n"
-        f"MARKETS WITH RESEARCH (all close within {MAX_HOLD_DAYS} days):\n"
+        f"MARKETS WITH LIVE RESEARCH (all close within {MAX_HOLD_DAYS} days):\n"
         f"{mkt_list}\n\n"
-        f"Each market above includes research data gathered RIGHT NOW from web searches.\n"
-        f"Use this research to estimate true probabilities and find mispricings.\n\n"
-        f"PROBABILITY REPORTING — CRITICAL:\n"
-        f"Always report true_prob and market_prob as the YES probability (0-100).\n"
-        f"If you think YES has 10% true chance and market says 27%, report:\n"
-        f"  true_prob=10, market_prob=27, position=NO\n"
-        f"The system automatically handles Kelly sizing from these numbers.\n\n"
+        f"The research above was gathered from live web searches seconds ago.\n"
+        f"Use it to estimate true probabilities and identify mispricings.\n\n"
+        f"PROBABILITY RULES — CRITICAL:\n"
+        f"Always report true_prob and market_prob as the YES probability.\n"
+        f"Example: market says YES=27¢, you think YES has 10% true chance:\n"
+        f"  market_prob=27, true_prob=10, position=NO\n"
+        f"The system handles Kelly inversion automatically.\n\n"
         f"CONFIDENCE GUIDE:\n"
-        f"  90-99%: Near-certain based on research\n"
-        f"  75-89%: High confidence, strong evidence\n"
-        f"  60-74%: Moderate confidence, real edge but uncertainty\n\n"
+        f"  90-99%: Near-certain, strong research evidence\n"
+        f"  75-89%: High confidence, clear evidence\n"
+        f"  60-74%: Moderate confidence, real edge exists\n\n"
         f"DIVERSIFICATION: Max {MAX_PER_CATEGORY} per category. No 3rd in any full category.\n\n"
         f"Return ONLY a valid JSON array, no other text:\n"
         f"[\n"
@@ -748,7 +792,7 @@ def opus_analyze(markets, research, state):
         f'    "true_prob": 10,\n'
         f'    "confidence": 88,\n'
         f'    "category": "geopolitics",\n'
-        f'    "research_summary": "2-3 sentences from the research above",\n'
+        f'    "research_summary": "2-3 sentences from the research",\n'
         f'    "key_factors": ["factor 1", "factor 2", "factor 3"],\n'
         f'    "bear_case": "main reason you could be wrong"\n'
         f"  }}\n"
@@ -793,7 +837,7 @@ def opus_analyze(markets, research, state):
                 log(f"  ⏭  Edge {edge}% too low — {r.get('market', '')[:50]}")
                 continue
             if r.get("confidence", 0) < MIN_CONFIDENCE:
-                log(f"  ⏭  Confidence {r.get('confidence')}% too low — {r.get('market', '')[:50]}")
+                log(f"  ⏭  Conf {r.get('confidence')}% too low — {r.get('market', '')[:50]}")
                 continue
             if not any(m["id"] == r.get("market_id") for m in markets):
                 log(f"  ⚠️  Unknown market_id {r.get('market_id')} — skip")
@@ -809,7 +853,7 @@ def opus_analyze(markets, research, state):
             edge = abs(r.get("true_prob", 0) - r.get("market_prob", 0))
             cat  = r.get("category") or get_category(r.get("market", ""))
             tier = get_tier_name(r.get("confidence", 0))
-            log(f"  📋 BUY {r['position']} | {cat} | {tier} | YES_market={r['market_prob']}% | YES_true={r['true_prob']}% | edge {edge}% | conf {r['confidence']}%")
+            log(f"  📋 BUY {r['position']} | {cat} | {tier} | YES_mkt={r['market_prob']}% | YES_true={r['true_prob']}% | edge {edge}% | conf {r['confidence']}%")
             log(f"     {r['market'][:70]}")
             log(f"     {r.get('research_summary', '')[:120]}")
             log(f"     Bear: {r.get('bear_case', '')[:80]}")
@@ -863,7 +907,7 @@ def place_paper_trade(rec, markets, state):
         log(f"  ⏭  Closes in {cid:.1f}d — outside window")
         return state
 
-    # Opus always reports YES probabilities. Invert for NO bets.
+    # Opus reports YES probabilities. Invert for NO bets.
     yes_true   = rec["true_prob"]
     yes_market = rec["market_prob"]
 
@@ -874,7 +918,7 @@ def place_paper_trade(rec, markets, state):
         kelly_true   = yes_true
         kelly_market = yes_market
 
-    log(f"  📐 Kelly: position={rec['position']} | kelly_true={kelly_true}% | kelly_market={kelly_market}%")
+    log(f"  📐 Kelly: {rec['position']} | kelly_true={kelly_true}% | kelly_market={kelly_market}%")
 
     stake = kelly_size(
         yes_true_prob   = kelly_true,
@@ -946,13 +990,14 @@ def print_portfolio(state):
     roi      = (state["bankroll"] - STARTING_BANKROLL) / STARTING_BANKROLL * 100
 
     print("\n" + "═" * 65)
-    print("  CLAUDEBOT v9  ·  Opus 4.6 · Haiku Research · Telegram")
+    print("  CLAUDEBOT v10  ·  DDG Search · Haiku · Opus 4.6")
     print("═" * 65)
     print(f"  Bankroll       ${state['bankroll']:.2f}  ({roi:+.1f}% ROI)")
     print(f"  Realized P&L   ${realized:+.2f}")
     print(f"  Open           {len(open_t)} / {MAX_OPEN_POSITIONS}")
     print(f"  Closed         {len(closed_t)}  ({len(won_t)}W / {len(lost_t)}L  —  {win_rate:.0f}% win rate)")
     print(f"  Total Scans    {state.get('scan_count', 0)}")
+    print(f"  DDG Search     {'✅ available' if DDG_AVAILABLE else '❌ not installed'}")
     print(f"  Telegram       {'✅ configured' if TELEGRAM_BOT_TOKEN else '❌ not configured'}")
     print("═" * 65)
 
@@ -976,12 +1021,16 @@ def print_portfolio(state):
 
 def single_scan():
     print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  CLAUDEBOT v9  ·  Haiku Research + Opus Analysis        ║")
-    print(f"║  {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}  |  Screen → Research → Analyse   ║")
+    print("║  CLAUDEBOT v10  ·  DDG Search + Haiku + Opus 4.6        ║")
+    print(f"║  {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}  |  Screen→Search→Interpret→Analyse ║")
     print("╚══════════════════════════════════════════════════════════╝\n")
 
     if not ANTHROPIC_API_KEY:
         print("❌  ANTHROPIC_API_KEY not set")
+        sys.exit(1)
+
+    if not DDG_AVAILABLE:
+        print("❌  duckduckgo-search not installed. Run: pip install duckduckgo-search")
         sys.exit(1)
 
     state = load_state()
@@ -1012,7 +1061,7 @@ def single_scan():
         print_portfolio(state)
         return
 
-    log("── Step 4: Haiku web research (per market) ──────────────")
+    log("── Step 4: Python DDG search + Haiku interpret ──────────")
     research = research_all_markets(top_markets)
 
     log("── Step 5: Opus 4.6 analysis ────────────────────────────")
@@ -1032,7 +1081,7 @@ def single_scan():
 
 def run_loop():
     print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  CLAUDEBOT v9  ·  Continuous Mode                        ║")
+    print("║  CLAUDEBOT v10  ·  Continuous Mode                       ║")
     print(f"║  Interval: {SCAN_INTERVAL_MINS}min (3h)  |  10 slots  |  Telegram     ║")
     print("╚══════════════════════════════════════════════════════════╝\n")
 
