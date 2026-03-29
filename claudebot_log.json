@@ -1,5 +1,5 @@
 {
-  "bankroll": 1251.81,
+  "bankroll": 1254.25,
   "trades": [
     {
       "id": "T1774412231",
@@ -109,10 +109,13 @@
         "Hezbollah chief explicitly vowed continued escalation"
       ],
       "bear_case": "Surprise ceasefire before March 27, though absolutely no signals of this",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-03-26T20:37:06.013884+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-03-29T06:00:16.124094+00:00",
+      "realized_pnl": 8.9
     },
     {
       "id": "T1774557426",
@@ -229,10 +232,38 @@
       "placed_at": "2026-03-29T03:18:52.160837+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1774764372",
+      "market_id": "1746848",
+      "market": "Russia military action against Kyiv municipality by March 31?",
+      "position": "YES",
+      "entry_price": 57,
+      "stake": 66.01,
+      "potential_return": 115.81,
+      "potential_profit": 49.8,
+      "confidence": 88,
+      "true_prob": 88,
+      "market_prob": 57,
+      "category": "geopolitics",
+      "closes_in_days": 1.75,
+      "closes": "2026-03-31T00:00:00+00:00",
+      "research_summary": "Russia attacks Kyiv with drones/missiles multiple times per week. In 2024 alone, Kyiv endured 1,300+ drone and 250+ missile attacks in 200 airstrikes. In March 2026, the spring offensive has intensified attacks, with massive 948-drone barrage on March 24, confirmed strikes on Kyiv City on March 14 killing 4+, and drones detected over Kyiv region as recently as March 28-29 with power outages in Kyiv city districts.",
+      "key_factors": [
+        "Russia launched spring offensive March 24 with record drone numbers",
+        "Kyiv endured ~4 aerial attacks per day in 2024 and 2026 frequency is higher",
+        "March 28-29 saw active drones over Kyiv region with ongoing power outages in Kyiv city districts"
+      ],
+      "bear_case": "Market resolution criteria may require a specific type of confirmed strike physically within Kyiv city municipal boundaries (vs region) from a specific source, creating resolution ambiguity",
+      "kelly_tier": "half-Kelly (5.0%)",
+      "status": "open",
+      "placed_at": "2026-03-29T06:06:12.475333+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-03-29",
-  "scan_count": 58,
+  "scan_count": 59,
   "started": "2026-03-23T09:17:53.961678"
 }
