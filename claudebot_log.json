@@ -1,5 +1,5 @@
 {
-  "bankroll": 909.42,
+  "bankroll": 855.68,
   "trades": [
     {
       "id": "T1774412231",
@@ -528,11 +528,69 @@
       "placed_at": "2026-03-30T10:00:04.812758+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1774866409",
+      "market_id": "1524999",
+      "market_slug": "chi-ron-qin-2026-04-03-total-4pt5",
+      "market": "Chengdu Rongcheng FC vs. Qingdao Xihaian FC: O/U 4.5",
+      "position": "NO",
+      "entry_price": 78,
+      "stake": 27.28,
+      "potential_return": 34.97,
+      "potential_profit": 7.69,
+      "confidence": 72,
+      "true_prob": 10,
+      "market_prob": 22,
+      "category": "sports",
+      "closes_in_days": 4.05,
+      "closes": "2026-04-03T11:35:00+00:00",
+      "research_summary": "The most recent H2H between these teams (March 15, 2026) ended 1-0. Chengdu has won 6 of 8 meetings, suggesting a dominant but low-scoring dynamic. Over 4.5 goals requires 5+ goals, which occurs in roughly 10-15% of soccer matches league-wide.",
+      "key_factors": [
+        "Recent H2H ended 1-0, consistent with defensive contests",
+        "Over 4.5 goals is statistically rare in any soccer match (~10-15% base rate)",
+        "Chengdu's dominance in H2H suggests controlled, low-scoring wins"
+      ],
+      "bear_case": "If Qingdao has made major offensive signings or either team's defensive form has collapsed, a high-scoring match is possible; team name discrepancy (Qingdao Hainiu vs Xihaian) adds identification risk",
+      "kelly_tier": "quarter-Kelly (3.0%)",
+      "status": "open",
+      "placed_at": "2026-03-30T10:26:49.806479+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1774866410",
+      "market_id": "1767470",
+      "market_slug": "atp-svrcina-berret-2026-03-30-first-set-total-10pt5",
+      "market": "Svrcina vs. Berrettini: Set 1 Games O/U 10.5",
+      "position": "NO",
+      "entry_price": 50,
+      "stake": 26.46,
+      "potential_return": 52.92,
+      "potential_profit": 26.46,
+      "confidence": 65,
+      "true_prob": 28,
+      "market_prob": 50,
+      "category": "sports",
+      "closes_in_days": 6.9,
+      "closes": "2026-04-06T08:00:00+00:00",
+      "research_summary": "Over 10.5 games in a set requires a 7-5 or 7-6 scoreline. ATP-wide, this occurs roughly 25-35% of the time. The Sinner-Zverev comparison shows Over 10.5 priced at 3.50 odds (~28.6%) even for two evenly matched top players. Berrettini as a likely significant favorite would produce more lopsided sets.",
+      "key_factors": [
+        "ATP sets go over 10.5 games only ~25-35% of the time across all matches",
+        "Comparable bookmaker odds for top-level match show Over 10.5 at ~28.6%",
+        "Berrettini (former world #6) likely far superior to Svrcina, producing shorter sets like 6-2, 6-3"
+      ],
+      "bear_case": "If Berrettini is returning from injury and underperforming, or the surface heavily favors serve-dominant play, more games could accumulate; Svrcina could be in better form than expected",
+      "kelly_tier": "quarter-Kelly (3.0%)",
+      "status": "open",
+      "placed_at": "2026-03-30T10:26:50.898242+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 68.71,
   "daily_reset": "2026-03-30",
-  "scan_count": 80,
+  "scan_count": 81,
   "started": "2026-03-23T09:17:53.961678",
   "last_daily_summary": "2026-03-30"
 }
