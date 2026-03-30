@@ -1,5 +1,5 @@
 {
-  "bankroll": 855.68,
+  "bankroll": 830.01,
   "trades": [
     {
       "id": "T1774412231",
@@ -586,11 +586,40 @@
       "placed_at": "2026-03-30T10:26:50.898242+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1774887082",
+      "market_id": "1783638",
+      "market_slug": "will-ufc-or-dana-white-be-said-during-the-first-episode-of-the-joe-rogan-experience-for-the-week-april-5",
+      "market": "Will \"UFC\" or \"Dana White\" be said during the first episode of the Joe Rogan Experience for the week (April 5)?",
+      "position": "YES",
+      "entry_price": 72,
+      "stake": 25.67,
+      "potential_return": 35.65,
+      "potential_profit": 9.98,
+      "confidence": 70,
+      "true_prob": 85,
+      "market_prob": 72,
+      "category": "entertainment",
+      "closes_in_days": 5.33,
+      "closes": "2026-04-05T00:00:00+00:00",
+      "research_summary": "Joe Rogan is an active UFC commentator and has been publicly discussing UFC and Dana White within the last 2 weeks, including criticism of Dana White over a BMF title fight and commentary on Ronda Rousey's pay dispute. The threshold is extremely low \u2014 just mentioning 'UFC' or 'Dana White' once in an entire episode.",
+      "key_factors": [
+        "Rogan is a contracted UFC commentator \u2014 UFC is deeply embedded in his regular conversation topics",
+        "Recent public engagement with UFC/Dana White topics (within 2 weeks) shows these are actively on his mind",
+        "The bar is very low: ANY mention of either term resolves YES, and 'UFC' is essentially part of Rogan's core vocabulary"
+      ],
+      "bear_case": "We don't know the guest for the April 5 episode \u2014 if it's a deep-dive interview with a scientist or author on an unrelated topic, Rogan might stay on-topic for the full episode without mentioning UFC",
+      "kelly_tier": "quarter-Kelly (3.0%)",
+      "status": "open",
+      "placed_at": "2026-03-30T16:11:22.765757+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 68.71,
   "daily_reset": "2026-03-30",
-  "scan_count": 82,
+  "scan_count": 83,
   "started": "2026-03-23T09:17:53.961678",
   "last_daily_summary": "2026-03-30"
 }
