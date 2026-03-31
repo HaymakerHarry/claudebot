@@ -1,5 +1,5 @@
 {
-  "bankroll": 805.11,
+  "bankroll": 780.96,
   "trades": [
     {
       "id": "T1774412231",
@@ -650,11 +650,40 @@
       "placed_at": "2026-03-30T19:13:25.561847+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1774993913",
+      "market_id": "1731409",
+      "market_slug": "ethereum-above-2100-on-april-2",
+      "market": "Will the price of Ethereum be above $2,100 on April 2?",
+      "position": "NO",
+      "entry_price": 50,
+      "stake": 24.15,
+      "potential_return": 48.3,
+      "potential_profit": 24.15,
+      "confidence": 64,
+      "true_prob": 40,
+      "market_prob": 50,
+      "category": "economics",
+      "closes_in_days": 1.76,
+      "closes": "2026-04-02T16:00:00+00:00",
+      "research_summary": "ETH is currently trading in the $2,020-$2,070 range, approximately $30-80 below the $2,100 target with 1.8 days remaining. Technical analysis identifies a resistance level at $2,082.07 that must be broken before reaching $2,100.",
+      "key_factors": [
+        "ETH needs 2-4% gain with resistance at $2,082 in the way",
+        "Statistical modeling with typical 4% daily volatility gives ~38-42% probability of exceeding $2,100 in 1.8 days",
+        "50/50 pricing likely reflects default uncertainty rather than quantitative analysis"
+      ],
+      "bear_case": "A single bullish catalyst (macro news, ETF flows, whale accumulation) could push ETH through resistance in hours; crypto volatility has fat tails making larger moves more probable than normal distribution suggests",
+      "kelly_tier": "quarter-Kelly (3.0%)",
+      "status": "open",
+      "placed_at": "2026-03-31T21:51:53.414044+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 16.72,
   "daily_reset": "2026-03-31",
-  "scan_count": 91,
+  "scan_count": 92,
   "started": "2026-03-23T09:17:53.961678",
   "last_daily_summary": "2026-03-30"
 }
