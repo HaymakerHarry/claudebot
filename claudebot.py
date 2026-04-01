@@ -1,12 +1,13 @@
 """
 ╔══════════════════════════════════════════════════════════╗
-║         CLAUDEBOT v10 — Polymarket Paper Trader          ║
+║         CLAUDEBOT v11 — Polymarket Paper Trader          ║
 ║                                                          ║
-║  Research pipeline:                                      ║
-║  1. Python searches DuckDuckGo for each market           ║
-║     → guaranteed real data, no AI deciding to skip       ║
-║  2. Haiku reads raw results → writes clean research brief ║
-║  3. Opus reads briefs → makes trading decisions          ║
+║  v11 changes (fixing losing streak):                     ║
+║  • MIN_CONFIDENCE: 60 → 75                               ║
+║  • MIN_EDGE_PCT: 7 → 15                                  ║
+║  • MAX_PER_CATEGORY: 2 → 1                               ║
+║  • Sports/esports BLOCKED — match prediction is not edge ║
+║  • Opus prompt tightened — explicit edge type guidance   ║
 ║                                                          ║
 ║  SETUP:  pip install anthropic requests ddgs             ║
 ║  RUN:    python claudebot.py --single-scan               ║
@@ -42,12 +43,12 @@ ANALYST_MODEL      = "claude-opus-4-6"
 PAPER_TRADING      = True
 STARTING_BANKROLL  = 1000.00
 MAX_BET_PCT        = 8.0
-MIN_CONFIDENCE     = 60
-MIN_EDGE_PCT       = 7
+MIN_CONFIDENCE     = 75    # raised from 60 — 60% is noise, not edge
+MIN_EDGE_PCT       = 15    # raised from 7 — need real mispricing
 MAX_OPEN_POSITIONS = 10
 MAX_HOLD_DAYS      = 7
 MIN_HOLD_HOURS     = 2
-DAILY_LOSS_LIMIT   = 200.00
+DAILY_LOSS_LIMIT   = 150.00
 SCAN_INTERVAL_MINS = 180
 SCREENER_TOP_N     = 10
 LOG_FILE           = "claudebot_log.json"
@@ -55,10 +56,12 @@ LOG_FILE           = "claudebot_log.json"
 KELLY_TIERS = [
     {"min_conf": 90, "kelly_fraction": 1.0, "max_pct": 8.0},
     {"min_conf": 75, "kelly_fraction": 0.5, "max_pct": 5.0},
-    {"min_conf": 60, "kelly_fraction": 0.25, "max_pct": 3.0},
 ]
 
-MAX_PER_CATEGORY = 2
+MAX_PER_CATEGORY = 1  # reduced from 2 — no doubling down on same category
+
+# Categories blocked entirely — no edge available via web research
+BLOCKED_CATEGORIES = {"sports"}
 
 
 # ─────────────────────────────────────────────────────────
@@ -101,14 +104,13 @@ def telegram_new_trade(trade, state):
     won_ct     = sum(1 for t in closed_t if t.get("won"))
     lost_ct    = len(closed_t) - won_ct
 
-    # Build Polymarket link if slug available
     slug      = trade.get("market_slug", "")
     link_line = (
         f"\n\n🔗 <a href=\"https://polymarket.com/event/{slug}\">Trade on Polymarket</a>"
         if slug else ""
     )
 
-    # ── PUBLIC — clean signal with link, no financials ────
+    # ── PUBLIC — clean signal, no financials ─────────────
     public_msg = (
         f"🤖 <b>CLAUDEBOT SIGNAL</b>\n"
         f"{'─' * 30}\n"
@@ -130,7 +132,7 @@ def telegram_new_trade(trade, state):
 
     # ── PRIVATE — full details with bankroll ──────────────
     if TELEGRAM_PERSONAL_ID:
-        tier_emoji = {"full": "🔥", "half": "💪", "quarter": "📊"}.get(
+        tier_emoji = {"full": "🔥", "half": "💪"}.get(
             trade.get("kelly_tier", "").split("-")[0], "📊"
         )
         private_msg = (
@@ -431,7 +433,7 @@ def fetch_markets():
 
 
 # ─────────────────────────────────────────────────────────
-#  DIVERSIFICATION
+#  DIVERSIFICATION + CATEGORY BLOCKING
 # ─────────────────────────────────────────────────────────
 
 def get_category(question):
@@ -448,17 +450,18 @@ def get_category(question):
                               "assists", "esport", "valorant", "counter-strike", "dota",
                               "leverkusen", "barcelona", "atletico", "flyers", "capitals",
                               "lakers", "celtics", "west brom", "wrexham", "jokic",
-                              "harris", "molcan", "kills", "bestia", "iceho", "rockets",
-                              "ahl:", "lol:", "fluxo", "leviatan", "honduras", "wd fc",
+                              "iceho", "rockets", "ahl:", "lol:", "fluxo", "leviatan",
                               "xspark", "xcrew", "prodigy", "rune eaters", "atputies",
                               "sinners", "jijiehao", "monchengladbach", "almeria",
-                              "real sociedad", "spain", "georgia", "lithuania",
-                              "kalieva", "urhobo"]):
+                              "real sociedad", "kalieva", "urhobo", "svrcina",
+                              "berrettini", "shinden", "melser", "real madrid",
+                              "chengdu", "qingdao"]):
         return "sports"
     if any(k in q for k in ["president", "election", "senate", "congress", "vote",
                               "government", "minister", "party", "trump", "biden",
                               "democrat", "republican", "musk", "tweets", "elon",
-                              "policy", "tariff", "doge"]):
+                              "policy", "tariff", "doge", "approval", "rogan",
+                              "dana white", "ufc"]):
         return "politics"
     if any(k in q for k in ["fed", "rate", "inflation", "gdp", "recession",
                               "unemployment", "economy", "s&p", "nasdaq", "dow",
@@ -483,6 +486,7 @@ def category_slots_available(category, state):
 
 # ─────────────────────────────────────────────────────────
 #  STAGE 1 — HAIKU SCREENER
+#  Sports/esports filtered out before even reaching research
 # ─────────────────────────────────────────────────────────
 
 def haiku_screen(markets, state):
@@ -491,7 +495,17 @@ def haiku_screen(markets, state):
 
     client     = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     open_ids   = {t["market_id"] for t in state["trades"] if t["status"] == "open"}
-    candidates = [m for m in markets if m["id"] not in open_ids]
+
+    # Filter out blocked categories before screening
+    candidates = [
+        m for m in markets
+        if m["id"] not in open_ids
+        and get_category(m["question"]) not in BLOCKED_CATEGORIES
+    ]
+
+    blocked_count = len([m for m in markets if get_category(m["question"]) in BLOCKED_CATEGORIES])
+    if blocked_count:
+        log(f"   ⛔ Filtered {blocked_count} sports/esports markets (blocked category)")
 
     if not candidates:
         return []
@@ -504,20 +518,25 @@ def haiku_screen(markets, state):
     prompt = (
         f"You are a fast prediction market screener. Today is {datetime.now(timezone.utc).strftime('%Y-%m-%d')}.\n\n"
         f"Score each market from 1-10 for MISPRICING POTENTIAL.\n"
-        f"High score = odds likely wrong, real edge exists.\n"
+        f"High score = odds likely wrong, real verifiable edge exists.\n"
         f"Low score = efficient market, skip it.\n\n"
-        f"Scoring factors:\n"
-        f"- Low volume (<$500k) = less efficient = higher score\n"
-        f"- Near 50/50 odds on genuinely uncertain events = potential edge\n"
-        f"- Time-sensitive events where news could shift things\n"
-        f"- Markets where crowd bias (fear/greed) is likely\n"
-        f"- Exact score / narrow range markets = harder to price = more edge\n\n"
+        f"HIGH VALUE markets (score 7-10):\n"
+        f"- Weather markets where forecasts clearly contradict the odds\n"
+        f"- Markets where breaking news hasn't been priced in yet\n"
+        f"- Markets with confirmed facts that make one outcome near-certain\n"
+        f"  (e.g. player withdrawal, confirmed event, verifiable data)\n"
+        f"- Narrow range markets where current data clearly misses the range\n\n"
+        f"LOW VALUE markets (score 1-4):\n"
+        f"- Any match prediction, game outcome, or competition result\n"
+        f"- Any crypto price prediction (too efficient, too volatile)\n"
+        f"- Any market where the outcome is genuinely uncertain and no\n"
+        f"  information asymmetry exists\n\n"
         f"Markets:\n{mkt_list}\n\n"
         f"Return ONLY a JSON array, no other text:\n"
         f'[{{"id":"market_id","score":7}}, ...]'
     )
 
-    log(f"⚡ Haiku screening {len(candidates)} markets...")
+    log(f"⚡ Haiku screening {len(candidates)} markets (sports already filtered)...")
 
     try:
         resp = client.messages.create(
@@ -545,7 +564,7 @@ def haiku_screen(markets, state):
         return top_markets
 
     except Exception as e:
-        log(f"⚠️  Haiku screener error ({e}) — passing all to research")
+        log(f"⚠️  Haiku screener error ({e}) — passing filtered candidates")
         return candidates[:SCREENER_TOP_N]
 
 
@@ -567,16 +586,6 @@ def build_search_query(market):
         city_match = re.search(r'in ([A-Z][a-zA-Z\s]+?)(?:\s+be|\s+have|\s+reach|\s+exceed)', q)
         city = city_match.group(1).strip() if city_match else q_clean
         return f"{city} weather forecast high temperature {date_full}"
-
-    elif cat == "sports":
-        q_clean = re.sub(r':\s*O/U\s*[\d.]+', '', q_clean)
-        q_clean = re.sub(r'Spread:\s*', '', q_clean)
-        q_clean = re.sub(r'\(BO[123]\).*', '', q_clean)
-        q_clean = re.sub(r'\s*[-–]\s*\w[\w\s]+(?:Championship|League|Series|Cup|Season|Play-In).*', '', q_clean)
-        q_clean = re.sub(r'AHL:\s*|LoL:\s*|Dota 2:\s*|Valorant:\s*|Counter-Strike:\s*', '', q_clean)
-        q_clean = re.sub(r'Exact Score:\s*', '', q_clean)
-        q_clean = q_clean.strip()
-        return f"{q_clean} match result odds {month_year}"
 
     elif cat == "economics":
         q_clean = re.sub(r'between \$[\d,]+ and \$[\d,]+', '', q_clean)
@@ -625,7 +634,6 @@ def search_market(market):
     query   = build_search_query(market)
     results = ddg_search(query)
 
-    # Fallback to simpler query if no results
     if not results:
         fallback = f"{market['question'][:80]} {datetime.now(timezone.utc).strftime('%B %Y')}"
         results  = ddg_search(fallback, max_results=3)
@@ -643,9 +651,9 @@ def search_market(market):
 def haiku_interpret(client, market, query, raw_results):
     if not raw_results:
         return (
-            f"No search results found for this market. "
-            f"Market: {market['question']} | Odds: YES={market['yes']}¢ NO={100-market['yes']}¢. "
-            f"Unable to find current data — insufficient information to recommend a trade."
+            f"No search results found. Market: {market['question']} | "
+            f"Odds: YES={market['yes']}¢ NO={100-market['yes']}¢. "
+            f"Insufficient data — do not recommend this trade."
         )
 
     results_txt = "\n\n".join(
@@ -682,7 +690,7 @@ def haiku_interpret(client, market, query, raw_results):
         return resp.content[0].text.strip()
     except Exception as e:
         log(f"     ⚠️  Haiku interpret error: {e}")
-        return f"Research interpretation failed. Raw snippets: {results_txt[:200]}"
+        return f"Research failed. Raw: {results_txt[:200]}"
 
 
 # ─────────────────────────────────────────────────────────
@@ -706,10 +714,10 @@ def research_all_markets(markets):
 
 
 # ─────────────────────────────────────────────────────────
-#  KELLY SIZING
+#  KELLY SIZING  ·  confidence-tiered
 # ─────────────────────────────────────────────────────────
 
-def kelly_size(win_prob, market_win_prob, bankroll, closes_in_days=7.0, confidence=70):
+def kelly_size(win_prob, market_win_prob, bankroll, closes_in_days=7.0, confidence=75):
     if not (0 < market_win_prob < 100) or not (0 < win_prob < 100):
         return 0.0
 
@@ -724,8 +732,8 @@ def kelly_size(win_prob, market_win_prob, bankroll, closes_in_days=7.0, confiden
     if full_kelly <= 0:
         return 0.0
 
-    fraction = 0.25
-    cap_pct  = 3.0
+    fraction = 0.5   # default half-Kelly (min confidence is now 75)
+    cap_pct  = 5.0
     for tier in KELLY_TIERS:
         if confidence >= tier["min_conf"]:
             fraction = tier["kelly_fraction"]
@@ -746,9 +754,9 @@ def kelly_size(win_prob, market_win_prob, bankroll, closes_in_days=7.0, confiden
 def get_tier_name(confidence):
     for tier in KELLY_TIERS:
         if confidence >= tier["min_conf"]:
-            fname = {1.0: "full", 0.5: "half", 0.25: "quarter"}.get(tier["kelly_fraction"], "?")
+            fname = {1.0: "full", 0.5: "half"}.get(tier["kelly_fraction"], "half")
             return f"{fname}-Kelly ({tier['max_pct']}%)"
-    return "quarter-Kelly (3%)"
+    return "half-Kelly (5%)"
 
 
 # ─────────────────────────────────────────────────────────
@@ -793,7 +801,7 @@ def opus_analyze(markets, research, state):
     open_trades = [t for t in state["trades"] if t["status"] == "open"]
     open_ctx    = ""
     if open_trades:
-        open_ctx = "\nCURRENT OPEN POSITIONS (do NOT re-recommend any of these):\n"
+        open_ctx = "\nCURRENT OPEN POSITIONS (do NOT re-recommend):\n"
         open_ctx += "\n".join(
             f"  {t['position']} @ {t['entry_price']}¢ | "
             f"cat:{t.get('category', get_category(t.get('market', '')))} | "
@@ -821,47 +829,51 @@ def opus_analyze(markets, research, state):
     mkt_list = "\n".join(mkt_sections)
 
     prompt = (
-        f"You are an expert algorithmic prediction market trader.\n\n"
+        f"You are an expert algorithmic prediction market trader. You are highly selective.\n\n"
         f"TODAY: {datetime.now(timezone.utc).strftime('%A %B %d %Y %H:%M UTC')}\n"
         f"BANKROLL: ${state['bankroll']:.2f} | AVAILABLE SLOTS: {available} | MAX BET: {MAX_BET_PCT}%\n"
         f"MIN EDGE: {MIN_EDGE_PCT}% | MIN CONFIDENCE: {MIN_CONFIDENCE}%\n"
         f"{history_ctx}\n"
         f"{open_ctx}\n\n"
-        f"MARKETS WITH LIVE RESEARCH (all close within {MAX_HOLD_DAYS} days):\n"
+        f"MARKETS WITH LIVE RESEARCH:\n"
         f"{mkt_list}\n\n"
-        f"The 'Live Research' above was gathered from real web searches seconds ago.\n"
-        f"Base your probability estimates on this research.\n"
-        f"If research is unavailable or irrelevant for a market, do NOT recommend it.\n\n"
-        f"CRITICAL — HOW TO REPORT PROBABILITIES:\n"
-        f"Always report true_prob and market_prob as the probability of YES (0-100).\n"
-        f"Do NOT adjust these for the position direction — always report the YES probability.\n"
-        f"Examples:\n"
-        f"  Market says YES=27¢, you think YES has 10% true chance → true_prob=10, market_prob=27, position=NO\n"
-        f"  Market says YES=45¢, you think YES has 65% true chance → true_prob=65, market_prob=45, position=YES\n"
-        f"The system automatically handles Kelly inversion for NO bets.\n\n"
+        f"THE ONLY TRADES WORTH TAKING are those with genuine INFORMATION ASYMMETRY:\n"
+        f"  ✅ GOOD EDGE: Weather forecast clearly outside market range (e.g. forecast 75°F, market prices 64-65°F)\n"
+        f"  ✅ GOOD EDGE: Confirmed fact not priced in (e.g. player withdrew, event confirmed/cancelled)\n"
+        f"  ✅ GOOD EDGE: Ongoing verifiable situation (e.g. active war, confirmed trend with data)\n"
+        f"  ✅ GOOD EDGE: Economic data where recent figures give strong directional signal\n\n"
+        f"  ❌ NO EDGE: Match predictions, game outcomes, player performance — too random\n"
+        f"  ❌ NO EDGE: Crypto prices — too efficient, too volatile, no real edge from web search\n"
+        f"  ❌ NO EDGE: Any market where research is vague, unavailable, or just restates the question\n"
+        f"  ❌ NO EDGE: Markets where you are guessing rather than knowing\n\n"
+        f"Be extremely selective. It is far better to make 0 trades than to take a bad trade.\n"
+        f"Only recommend a trade if you would bet your own money on it with high conviction.\n\n"
+        f"PROBABILITY RULES:\n"
+        f"Always report true_prob and market_prob as the YES probability (0-100).\n"
+        f"For NO bets: true_prob < market_prob (you think YES is less likely than priced).\n"
+        f"For YES bets: true_prob > market_prob (you think YES is more likely than priced).\n"
+        f"The system handles Kelly inversion automatically.\n\n"
         f"CONFIDENCE GUIDE:\n"
-        f"  90-99%: Near-certain. Research shows overwhelming evidence.\n"
-        f"  75-89%: High confidence. Strong evidence pointing clearly one way.\n"
-        f"  60-74%: Moderate confidence. Edge exists but meaningful uncertainty.\n\n"
-        f"DIVERSIFICATION RULE:\n"
-        f"  Max {MAX_PER_CATEGORY} open positions per category at any time.\n"
-        f"  Do NOT recommend a 3rd position in a category already at {MAX_PER_CATEGORY}.\n\n"
-        f"Return ONLY a valid JSON array, no preamble, no explanation:\n"
+        f"  90-99%: Near-certain. Research shows overwhelming, specific evidence.\n"
+        f"  75-89%: High confidence. Strong evidence, clear directional signal.\n"
+        f"  Below 75%: Do NOT recommend — insufficient confidence.\n\n"
+        f"DIVERSIFICATION: Max {MAX_PER_CATEGORY} per category. No 2nd in any full category.\n\n"
+        f"Return ONLY a valid JSON array:\n"
         f"[\n"
         f"  {{\n"
-        f'    "market_id": "exact ID from list above",\n'
-        f'    "market": "exact question text",\n'
+        f'    "market_id": "exact ID",\n'
+        f'    "market": "exact question",\n'
         f'    "position": "YES or NO",\n'
         f'    "market_prob": 27,\n'
-        f'    "true_prob": 10,\n'
+        f'    "true_prob": 5,\n'
         f'    "confidence": 88,\n'
-        f'    "category": "geopolitics",\n'
-        f'    "research_summary": "2-3 sentences citing specific facts from the live research",\n'
-        f'    "key_factors": ["specific factor 1", "specific factor 2", "specific factor 3"],\n'
-        f'    "bear_case": "the main reason this trade could go wrong"\n'
+        f'    "category": "weather",\n'
+        f'    "research_summary": "specific facts from the live research that support this trade",\n'
+        f'    "key_factors": ["factor 1", "factor 2", "factor 3"],\n'
+        f'    "bear_case": "main reason this trade could go wrong"\n'
         f"  }}\n"
         f"]\n\n"
-        f"If no market has genuine edge >= {MIN_EDGE_PCT}% after reviewing the research, return: []"
+        f"If no market meets the standard, return: []"
     )
 
     log(f"🧠 Opus 4.6 analyzing {len(markets)} researched markets...")
@@ -898,15 +910,18 @@ def opus_analyze(markets, research, state):
         for r in recs:
             edge = abs(r.get("true_prob", 0) - r.get("market_prob", 0))
             if edge < MIN_EDGE_PCT:
-                log(f"  ⏭  Edge {edge}% too low — {r.get('market', '')[:50]}")
+                log(f"  ⏭  Edge {edge}% < {MIN_EDGE_PCT}% — {r.get('market', '')[:50]}")
                 continue
             if r.get("confidence", 0) < MIN_CONFIDENCE:
-                log(f"  ⏭  Conf {r.get('confidence')}% too low — {r.get('market', '')[:50]}")
+                log(f"  ⏭  Conf {r.get('confidence')}% < {MIN_CONFIDENCE}% — {r.get('market', '')[:50]}")
                 continue
             if not any(m["id"] == r.get("market_id") for m in markets):
                 log(f"  ⚠️  Unknown market_id {r.get('market_id')} — skip")
                 continue
             cat = r.get("category") or get_category(r.get("market", ""))
+            if cat in BLOCKED_CATEGORIES:
+                log(f"  ⛔ Category '{cat}' is blocked — {r.get('market', '')[:50]}")
+                continue
             if not category_slots_available(cat, state):
                 log(f"  ⏭  Category '{cat}' full — {r.get('market', '')[:50]}")
                 continue
@@ -952,6 +967,11 @@ def place_paper_trade(rec, markets, state):
         return state
 
     cat = rec.get("category") or get_category(rec.get("market", ""))
+
+    if cat in BLOCKED_CATEGORIES:
+        log(f"  ⛔ Category '{cat}' is blocked — skipping")
+        return state
+
     if not category_slots_available(cat, state):
         log(f"  ⏭  Category '{cat}' already at max ({MAX_PER_CATEGORY})")
         return state
@@ -1054,14 +1074,16 @@ def print_portfolio(state):
     roi      = (state["bankroll"] - STARTING_BANKROLL) / STARTING_BANKROLL * 100
 
     print("\n" + "═" * 65)
-    print("  CLAUDEBOT v10  ·  DDG + Haiku + Opus 4.6 · Telegram")
+    print("  CLAUDEBOT v11  ·  DDG + Haiku + Opus 4.6 · Selective")
     print("═" * 65)
     print(f"  Bankroll       ${state['bankroll']:.2f}  ({roi:+.1f}% ROI)")
     print(f"  Realized P&L   ${realized:+.2f}")
     print(f"  Open           {len(open_t)} / {MAX_OPEN_POSITIONS}")
     print(f"  Closed         {len(closed_t)}  ({len(won_t)}W / {len(lost_t)}L  —  {win_rate:.0f}% win rate)")
     print(f"  Total Scans    {state.get('scan_count', 0)}")
-    print(f"  DDG Search     {'✅ available' if DDG_AVAILABLE else '❌ not installed (pip install ddgs)'}")
+    print(f"  Min confidence {MIN_CONFIDENCE}% | Min edge {MIN_EDGE_PCT}%")
+    print(f"  Blocked        {', '.join(BLOCKED_CATEGORIES)}")
+    print(f"  DDG Search     {'✅ available' if DDG_AVAILABLE else '❌ not installed'}")
     print(f"  Telegram       {'✅ configured' if TELEGRAM_BOT_TOKEN else '❌ not configured'}")
     print("═" * 65)
 
@@ -1085,7 +1107,7 @@ def print_portfolio(state):
 
 def single_scan():
     print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  CLAUDEBOT v10  ·  DDG Search + Haiku + Opus 4.6        ║")
+    print("║  CLAUDEBOT v11  ·  Selective · No Sports · High Edge    ║")
     print(f"║  {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}  |  Screen→Search→Interpret→Analyse ║")
     print("╚══════════════════════════════════════════════════════════╝\n")
 
@@ -1116,7 +1138,7 @@ def single_scan():
         print_portfolio(state)
         return
 
-    log("── Step 3: Haiku fast screen ─────────────────────────────")
+    log("── Step 3: Haiku screen (sports pre-filtered) ───────────")
     top_markets = haiku_screen(markets, state)
 
     if not top_markets:
@@ -1133,7 +1155,7 @@ def single_scan():
 
     log("── Step 6: Place trades ──────────────────────────────────")
     if not recs:
-        log("No trades this scan")
+        log("No trades this scan — good, patience is the strategy")
     else:
         for rec in recs:
             state = place_paper_trade(rec, markets, state)
@@ -1145,8 +1167,8 @@ def single_scan():
 
 def run_loop():
     print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  CLAUDEBOT v10  ·  Continuous Mode                       ║")
-    print(f"║  Interval: {SCAN_INTERVAL_MINS}min (3h) | 10 slots | DDG+Haiku+Opus  ║")
+    print("║  CLAUDEBOT v11  ·  Continuous Mode                       ║")
+    print(f"║  Interval: {SCAN_INTERVAL_MINS}min (3h) | Selective | No Sports      ║")
     print("╚══════════════════════════════════════════════════════════╝\n")
 
     if not ANTHROPIC_API_KEY:
