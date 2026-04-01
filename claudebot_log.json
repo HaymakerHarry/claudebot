@@ -617,10 +617,13 @@
       ],
       "bear_case": "We don't know the guest for the April 5 episode \u2014 if it's a deep-dive interview with a scientist or author on an unrelated topic, Rogan might stay on-topic for the full episode without mentioning UFC",
       "kelly_tier": "quarter-Kelly (3.0%)",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-03-30T16:11:22.765757+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": false,
+      "resolved_at": "2026-04-01T07:45:27.017023+00:00",
+      "realized_pnl": -25.67
     },
     {
       "id": "T1774898005",
@@ -681,9 +684,9 @@
       "model": "claude-opus-4-6"
     }
   ],
-  "daily_loss": 0.0,
+  "daily_loss": 25.67,
   "daily_reset": "2026-04-01",
-  "scan_count": 93,
+  "scan_count": 94,
   "started": "2026-03-23T09:17:53.961678",
   "last_daily_summary": "2026-03-30"
 }
