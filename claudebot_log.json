@@ -684,9 +684,9 @@
       "model": "claude-opus-4-6"
     }
   ],
-  "daily_loss": 25.67,
-  "daily_reset": "2026-04-01",
-  "scan_count": 101,
+  "daily_loss": 0.0,
+  "daily_reset": "2026-04-02",
+  "scan_count": 102,
   "started": "2026-03-23T09:17:53.961678",
   "last_daily_summary": "2026-03-30"
 }
