@@ -1,9 +1,40 @@
 {
-  "bankroll": 1000.0,
-  "trades": [],
+  "bankroll": 930.0,
+  "trades": [
+    {
+      "id": "T1775098669",
+      "tier": 1,
+      "market_id": "1748588",
+      "market_slug": "will-wti-dip-to-95-by-march-30-2026",
+      "market": "Will WTI Crude Oil (WTI) hit (LOW) $95 Week of March 30 2026?",
+      "position": "YES",
+      "entry_price": 40,
+      "stake": 70.0,
+      "potential_return": 175.0,
+      "potential_profit": 105.0,
+      "confidence": 82,
+      "true_prob": 85,
+      "market_prob": 40,
+      "category": "commodities",
+      "closes_in_days": 1.8,
+      "closes": "2026-04-03T21:00:00+00:00",
+      "research_summary": "Multiple sources confirm WTI traded in the $95-$100 range as of March 30. WSJ documented WTI surging to $95/barrel. May 2026 futures priced at $93-$95. Research explicitly states WTI already reached the $95 threshold during the target week. The $95 level appears to have been touched on the downside during normal trading.",
+      "key_factors": [
+        "WTI confirmed trading at $95-$100 range during the target week (March 30)",
+        "May 2026 futures priced at $93-$95, confirming $95 level was reached",
+        "WSJ report corroborates WTI at $95 per barrel during this period"
+      ],
+      "bear_case": "Ambiguity in resolution criteria \u2014 if 'hit LOW $95' requires a specific intraday tick at exactly $95.00 rather than trading near/at $95, outcome could differ; low volume ($100) may limit execution",
+      "kelly_tier": "half-Kelly (7.0%)",
+      "status": "open",
+      "placed_at": "2026-04-02T02:57:49.374394+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
+    }
+  ],
   "daily_loss": 0.0,
   "daily_reset": "2026-04-02",
-  "scan_count": 1,
+  "scan_count": 2,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "",
   "last_tier2_scan": "",
