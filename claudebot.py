@@ -497,6 +497,17 @@ def fetch_markets_for_tier(tier_num):
         cat = get_category(m["question"])
         if cat in BLOCKED_CATEGORIES:
             continue
+        # Block micro-markets: 5-min crypto flips, odd/even kills, etc.
+        q_lower = m["question"].lower()
+        if any(k in q_lower for k in [
+            "up or down", "odd or even", "odd/even", "total kills",
+        ]):
+            skipped += 1
+            continue
+        # Block markets closing in under 1 hour (too short to act on)
+        if cid < (1 / 24):
+            skipped += 1
+            continue
         markets.append({
             "id":             str(m.get("id", "")),
             "slug":           m.get("slug", ""),
@@ -627,9 +638,11 @@ def haiku_screen(markets, state, tier_num):
         )
         raw = resp.content[0].text.strip()
         raw = raw.replace("```json", "").replace("```", "").strip()
-        if not raw.startswith("["):
+        # Extract JSON array robustly — handles trailing text after the array
+        match = re.search(r'\[[\s\S]*?\](?=\s*$|\s*[^,\[\{])', raw)
+        if not match:
             match = re.search(r'\[[\s\S]*\]', raw)
-            raw = match.group(0) if match else "[]"
+        raw = match.group(0) if match else "[]"
 
         scores      = json.loads(raw)
         scores.sort(key=lambda x: x.get("score", 0), reverse=True)
