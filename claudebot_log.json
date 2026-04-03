@@ -1,5 +1,5 @@
 {
-  "bankroll": 778.41,
+  "bankroll": 700.57,
   "trades": [
     {
       "id": "T1775098669",
@@ -90,13 +90,43 @@
       "placed_at": "2026-04-02T15:05:50.386441+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1775186280",
+      "tier": 1,
+      "market_id": "1743727",
+      "market_slug": "solana-above-80-on-april-3",
+      "market": "Will the price of Solana be above $80 on April 3?",
+      "position": "YES",
+      "entry_price": 36,
+      "stake": 77.84,
+      "potential_return": 216.22,
+      "potential_profit": 138.38,
+      "confidence": 84,
+      "true_prob": 87,
+      "market_prob": 36,
+      "category": "crypto",
+      "closes_in_days": 0.5,
+      "closes": "2026-04-03T16:00:00+00:00",
+      "research_summary": "Multiple real-time price sources show SOL trading at $82-$84 (Changelly: $83.79, Yahoo Finance: $82.71). Market closes today April 3. Price would need an unusual 3-5% single-day crash to drop below $80. Recent low was $79.09 five days ago but price has recovered and stabilized above $82.",
+      "key_factors": [
+        "Three independent sources confirm current SOL price at $82-$84, well above the $80 threshold",
+        "Market closes today\u2014this is essentially resolved, not a prediction",
+        "Would require an unusual 4%+ intraday crash to move below $80"
+      ],
+      "bear_case": "Crypto volatility is real\u2014SOL briefly touched $79.09 just 5 days ago, and a sudden sell-off or black swan event could push it below $80 before market close",
+      "kelly_tier": "half-Kelly (10.0%)",
+      "status": "open",
+      "placed_at": "2026-04-03T03:18:00.578948+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 0.0,
-  "daily_reset": "2026-04-02",
-  "scan_count": 10,
+  "daily_reset": "2026-04-03",
+  "scan_count": 11,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "",
-  "last_tier2_scan": "2026-04-02",
+  "last_tier2_scan": "2026-04-03",
   "last_tier3_scan": "2026-W13"
 }
