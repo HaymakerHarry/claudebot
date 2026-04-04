@@ -1,5 +1,5 @@
 {
-  "bankroll": 916.79,
+  "bankroll": 1555.66,
   "trades": [
     {
       "id": "T1775098669",
@@ -89,10 +89,13 @@
       ],
       "bear_case": "Missing specific HDD April 1 tracking number; resolution criteria could differ between platforms; minimal promotion could have depressed streaming numbers more than expected",
       "kelly_tier": "half-Kelly (10.0%)",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-02T15:05:50.386441+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-04-04T02:48:47.299428+00:00",
+      "realized_pnl": 634.26
     },
     {
       "id": "T1775186280",
@@ -126,13 +129,44 @@
       "won": true,
       "resolved_at": "2026-04-03T21:41:47.498205+00:00",
       "realized_pnl": 138.38
+    },
+    {
+      "id": "T1775271291",
+      "tier": 2,
+      "market_id": "1696453",
+      "market_slug": "will-there-be-at-least-2200-measles-cases-in-the-us-by-april-30-2026-149-975-198",
+      "market": "Will there be at least 2200 measles cases in the U.S. by April 30, 2026?",
+      "position": "YES",
+      "entry_price": 6,
+      "stake": 81.88,
+      "potential_return": 1364.67,
+      "potential_profit": 1282.79,
+      "confidence": 82,
+      "true_prob": 35,
+      "market_prob": 6,
+      "category": "health",
+      "closes_in_days": 25.9,
+      "closes": "2026-04-30T00:00:00+00:00",
+      "research_summary": "CDC data shows 1,575 confirmed measles cases as of March 26 (day 85 of 2026), averaging 18.5 cases/day. Simple linear extrapolation over remaining 35 days yields ~2,222 cases \u2014 clearing the 2,200 threshold. 16 active outbreaks with 94% outbreak-linked transmission indicate sustained case generation. Research brief characterizes YES as 'moderately likely,' dramatically above the 6% market price.",
+      "key_factors": [
+        "Linear extrapolation of 18.5 cases/day average already clears 2,200 target by April 30",
+        "16 active outbreaks with sustained outbreak-associated transmission",
+        "2026 already tracking at 3x the 2025 daily case rate (worst since 2000)",
+        "CDC reporting lag may mean current count already higher than last reported 1,575"
+      ],
+      "bear_case": "Sharp deceleration in daily case rate not captured in available data; public health interventions containing active outbreaks; seasonal decline in measles transmission already underway",
+      "kelly_tier": "quarter-Kelly (5.0%)",
+      "status": "open",
+      "placed_at": "2026-04-04T02:54:51.276932+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
-  "daily_loss": 65.1,
-  "daily_reset": "2026-04-03",
-  "scan_count": 17,
+  "daily_loss": 0.0,
+  "daily_reset": "2026-04-04",
+  "scan_count": 18,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-03",
-  "last_tier2_scan": "2026-04-03",
+  "last_tier2_scan": "2026-04-04",
   "last_tier3_scan": "2026-W13"
 }
