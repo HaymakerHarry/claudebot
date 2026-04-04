@@ -26,10 +26,13 @@
       ],
       "bear_case": "Ambiguity in resolution criteria \u2014 if 'hit LOW $95' requires a specific intraday tick at exactly $95.00 rather than trading near/at $95, outcome could differ; low volume ($100) may limit execution",
       "kelly_tier": "half-Kelly (7.0%)",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-02T02:57:49.374394+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": false,
+      "resolved_at": "2026-04-04T04:58:03.366397+00:00",
+      "realized_pnl": -70.0
     },
     {
       "id": "T1775114841",
@@ -162,9 +165,9 @@
       "model": "claude-opus-4-6"
     }
   ],
-  "daily_loss": 0.0,
+  "daily_loss": 70.0,
   "daily_reset": "2026-04-04",
-  "scan_count": 18,
+  "scan_count": 19,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-03",
   "last_tier2_scan": "2026-04-04",
