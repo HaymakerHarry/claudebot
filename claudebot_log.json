@@ -1,5 +1,5 @@
 {
-  "bankroll": 1137.23,
+  "bankroll": 1366.75,
   "trades": [
     {
       "id": "T1775098669",
@@ -221,10 +221,13 @@
       ],
       "bear_case": "Easter Egg Roll is a children's event; staff could successfully keep Trump on brief scripted remarks with no media Q&A, and Trump might deliberately avoid the topic at a family event",
       "kelly_tier": "half-Kelly (10.0%)",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-05T03:27:51.520240+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-04-06T19:12:16.168006+00:00",
+      "realized_pnl": 89.51
     },
     {
       "id": "T1775446385",
@@ -291,7 +294,7 @@
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-04-06",
-  "scan_count": 37,
+  "scan_count": 38,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-05",
   "last_tier2_scan": "2026-04-06",
