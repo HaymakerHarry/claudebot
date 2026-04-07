@@ -1,5 +1,5 @@
 {
-  "bankroll": 1366.75,
+  "bankroll": 1230.07,
   "trades": [
     {
       "id": "T1775098669",
@@ -290,11 +290,42 @@
       "placed_at": "2026-04-06T03:33:06.771464+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1775578495",
+      "tier": 1,
+      "market_id": "1854100",
+      "market_slug": "zelenskyy-of-tweets-april-7-april-14-2026-20-39",
+      "market": "Will Zelenskyy post 20-39 posts from April 7 to April 14, 2026?",
+      "position": "NO",
+      "entry_price": 79,
+      "stake": 136.68,
+      "potential_return": 173.01,
+      "potential_profit": 36.33,
+      "confidence": 85,
+      "true_prob": 5,
+      "market_prob": 21,
+      "category": "other",
+      "closes_in_days": 7.0,
+      "closes": "2026-04-14T16:00:00+00:00",
+      "research_summary": "Trader consensus for overlapping Apr 3-10 window shows only ~5% allocation to 20-39 post range, with 61% clustering in 60-99 posts. Zelenskyy is in active diplomatic communication period regarding Easter ceasefire proposals, which historically correlates with elevated posting frequency. His baseline weekly posting rate consistently exceeds 60 posts.",
+      "key_factors": [
+        "Historical posting data shows Zelenskyy averages 60-100+ posts per 7-day window, far above the 20-39 threshold",
+        "Active Easter ceasefire diplomacy and ongoing war communication demands elevate posting frequency",
+        "Overlapping period (Apr 3-10) market consensus allocated only 5% to the 20-39 range"
+      ],
+      "bear_case": "Zelenskyy could go dark for security reasons, have connectivity/health issues, or platform changes could affect post counting methodology. Ceasefire deal could reduce communication urgency.",
+      "kelly_tier": "half-Kelly (10.0%)",
+      "news_triggered": true,
+      "status": "open",
+      "placed_at": "2026-04-07T16:14:55.199482+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-04-07",
-  "scan_count": 44,
+  "scan_count": 45,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-05",
   "last_tier2_scan": "2026-04-07",
