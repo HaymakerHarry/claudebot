@@ -1,25 +1,19 @@
 """
 ╔══════════════════════════════════════════════════════════╗
-║         CLAUDEBOT v12 — Three-Tier Polymarket Trader     ║
+║         CLAUDEBOT v13 — Three-Tier Polymarket Trader     ║
 ║                                                          ║
-║  TIER 1 — Short-term  (1-7 days)                         ║
-║    Min confidence 75% | Min edge 15%                     ║
-║    Half-Kelly max 7% | Full-Kelly max 12%                ║
-║    Runs every 3 hours | DDG research                     ║
+║  Step 0: RSS news monitor — flags breaking edge events   ║
+║  Tier 1: Short-term  1-7d  | conf≥75% | edge≥15%        ║
+║  Tier 2: Medium-term 8-30d | conf≥80% | edge≥20%        ║
+║  Tier 3: Long-term  31-180d| conf≥90% | edge≥25%        ║
 ║                                                          ║
-║  TIER 2 — Medium-term (8-30 days)                        ║
-║    Min confidence 80% | Min edge 20%                     ║
-║    Quarter-Kelly max 4% | Half-Kelly max 6%              ║
-║    Runs once daily | DDG research                        ║
+║  Fixes vs v12:                                           ║
+║  • Screener diversity cap — max 2 per category in top N  ║
+║  • Opus JSON parse hardened — no more empty-value errors ║
+║  • News monitor layer fully integrated                   ║
+║  • Health added as tracked category                      ║
 ║                                                          ║
-║  TIER 3 — Long-term   (31-180 days)                      ║
-║    Min confidence 90% | Min edge 25%                     ║
-║    Fixed 2% stake — Kelly is false precision at 6mo      ║
-║    Runs once weekly | Pure Opus reasoning, no DDG        ║
-║                                                          ║
-║  All tiers: sports blocked, max 1 per category           ║
-║                                                          ║
-║  SETUP:  pip install anthropic requests ddgs             ║
+║  SETUP:  pip install anthropic requests ddgs feedparser  ║
 ║  RUN:    python claudebot.py --single-scan               ║
 ╚══════════════════════════════════════════════════════════╝
 """
@@ -39,6 +33,12 @@ try:
 except ImportError:
     DDG_AVAILABLE = False
 
+try:
+    import feedparser
+    FEEDPARSER_AVAILABLE = True
+except ImportError:
+    FEEDPARSER_AVAILABLE = False
+
 # ─────────────────────────────────────────────────────────
 #  CONFIG
 # ─────────────────────────────────────────────────────────
@@ -48,18 +48,16 @@ TELEGRAM_BOT_TOKEN   = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHANNEL_ID  = os.environ.get("TELEGRAM_CHANNEL_ID", "")
 TELEGRAM_PERSONAL_ID = os.environ.get("TELEGRAM_PERSONAL_ID", "")
 
-SCREENER_MODEL  = "claude-haiku-4-5-20251001"
-ANALYST_MODEL   = "claude-opus-4-6"
-PAPER_TRADING   = True
+SCREENER_MODEL     = "claude-haiku-4-5-20251001"
+ANALYST_MODEL      = "claude-opus-4-6"
+PAPER_TRADING      = True
 STARTING_BANKROLL  = 1000.00
 DAILY_LOSS_LIMIT   = 150.00
 SCAN_INTERVAL_MINS = 180
 LOG_FILE           = "claudebot_log.json"
 
-# Categories blocked entirely across all tiers
 BLOCKED_CATEGORIES = {"sports"}
 
-# ── TIER DEFINITIONS ─────────────────────────────────────
 TIERS = {
     1: {
         "name":           "Short-term",
@@ -69,16 +67,15 @@ TIERS = {
         "min_confidence": 75,
         "min_edge_pct":   15,
         "max_positions":  6,
-        "fixed_pct":      None,   # use Kelly
+        "fixed_pct":      None,
         "kelly": [
             {"min_conf": 90, "fraction": 1.0, "max_pct": 15.0},
             {"min_conf": 75, "fraction": 0.5, "max_pct": 10.0},
         ],
         "short_disc_1d":  0.65,
         "short_disc_2d":  0.80,
-        "use_ddg":        True,
         "screener_top_n": 10,
-        # runs every 3h — always active
+        "screener_max_per_cat": 2,   # diversity cap in screener output
     },
     2: {
         "name":           "Medium-term",
@@ -88,15 +85,14 @@ TIERS = {
         "min_confidence": 80,
         "min_edge_pct":   20,
         "max_positions":  3,
-        "fixed_pct":      None,   # use Kelly
+        "fixed_pct":      None,
         "kelly": [
             {"min_conf": 90, "fraction": 0.5,  "max_pct": 8.0},
             {"min_conf": 80, "fraction": 0.25, "max_pct": 5.0},
         ],
-        "time_discount":  0.75,   # structural uncertainty discount
-        "use_ddg":        True,
+        "time_discount":  0.75,
         "screener_top_n": 8,
-        # runs once daily at 9am UTC
+        "screener_max_per_cat": 2,
     },
     3: {
         "name":           "Long-term",
@@ -106,15 +102,25 @@ TIERS = {
         "min_confidence": 90,
         "min_edge_pct":   25,
         "max_positions":  4,
-        "fixed_pct":      3.0,    # fixed 3% — Kelly is false precision at 6mo
+        "fixed_pct":      3.0,
         "kelly":          [],
-        "use_ddg":        False,  # pure Opus structural reasoning
         "screener_top_n": 8,
-        # runs once weekly on Sunday
+        "screener_max_per_cat": 2,
     },
 }
 
-MAX_PER_CATEGORY = 1  # across all tiers combined
+MAX_PER_CATEGORY = 1
+
+NEWS_FEEDS = [
+    ("Reuters World",  "https://feeds.reuters.com/reuters/worldNews"),
+    ("BBC News",       "https://feeds.bbci.co.uk/news/rss.xml"),
+    ("Al Jazeera",     "https://www.aljazeera.com/xml/rss/all.xml"),
+    ("Sky News",       "https://feeds.skynews.com/feeds/rss/world.xml"),
+    ("CDC",            "https://tools.cdc.gov/api/v2/resources/media/404952.rss"),
+    ("NOAA Alerts",    "https://alerts.weather.gov/cap/us.php?x=1"),
+    ("MarketWatch",    "https://feeds.content.dowjones.io/public/rss/mw_realtimeheadlines"),
+]
+NEWS_LOOKBACK_HOURS = 6
 
 
 # ─────────────────────────────────────────────────────────
@@ -123,6 +129,54 @@ MAX_PER_CATEGORY = 1  # across all tiers combined
 
 def log(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
+
+
+# ─────────────────────────────────────────────────────────
+#  CATEGORY HELPER  (defined early — used everywhere)
+# ─────────────────────────────────────────────────────────
+
+def get_category(question):
+    q = question.lower()
+    if any(k in q for k in ["temperature", "weather", "rain", "snow", "°c", "°f",
+                              "celsius", "fahrenheit", "precipitation", "humid"]):
+        return "weather"
+    if any(k in q for k in ["measles", "outbreak", "disease", "pandemic", "virus",
+                              "covid", "flu", "mpox", "cases", "cdc", "who",
+                              "vaccination", "epidemic"]):
+        return "health"
+    if any(k in q for k in ["bitcoin", "btc", "ethereum", "eth", "crypto",
+                              "solana", "bnb", "xrp", "defi", "sol"]):
+        return "crypto"
+    if any(k in q for k in ["nba", "nfl", "mlb", "nhl", "soccer", "football",
+                              "tennis", "golf", "points", "goals", "score", "match",
+                              "game", "fc ", " united", "spread", "o/u", "rebounds",
+                              "assists", "esport", "valorant", "counter-strike", "dota",
+                              "leverkusen", "barcelona", "atletico", "flyers", "capitals",
+                              "lakers", "celtics", "west brom", "wrexham", "jokic",
+                              "iceho", "rockets", "ahl:", "lol:", "fluxo", "leviatan",
+                              "xspark", "xcrew", "prodigy", "rune eaters", "atputies",
+                              "sinners", "jijiehao", "almeria", "kalieva", "urhobo",
+                              "svrcina", "berrettini", "shinden", "melser", "real madrid",
+                              "chengdu", "qingdao", "monchengladbach", "real sociedad"]):
+        return "sports"
+    if any(k in q for k in ["president", "election", "senate", "congress", "vote",
+                              "government", "minister", "party", "trump", "biden",
+                              "democrat", "republican", "musk", "tweets", "elon",
+                              "policy", "tariff", "doge", "approval", "rogan",
+                              "dana white", "ufc"]):
+        return "politics"
+    if any(k in q for k in ["fed", "rate", "inflation", "gdp", "recession",
+                              "unemployment", "economy", "s&p", "nasdaq", "dow",
+                              "jobs", "robinhood", "hood", "amazon", "amzn",
+                              "stock", "market cap", "earnings", "ecb", "interest"]):
+        return "economics"
+    if any(k in q for k in ["war", "military", "attack", "ceasefire", "hezbollah",
+                              "ukraine", "russia", "israel", "hamas", "conflict",
+                              "kyiv", "kostyantynivka", "borova", "troops", "nato",
+                              "iran", "china", "taiwan", "north korea", "missile",
+                              "strike", "yemen", "houthi"]):
+        return "geopolitics"
+    return "other"
 
 
 # ─────────────────────────────────────────────────────────
@@ -163,22 +217,22 @@ def telegram_new_trade(trade, state):
     t_num      = trade.get("tier", 1)
     badge      = tier_badge(t_num)
     tier_label = TIERS[t_num]["name"]
-
-    slug      = trade.get("market_slug", "")
-    link_line = (
+    news_flag  = "📰 <i>News-triggered</i>\n" if trade.get("news_triggered") else ""
+    slug       = trade.get("market_slug", "")
+    link_line  = (
         f"\n\n🔗 <a href=\"https://polymarket.com/event/{slug}\">Trade on Polymarket</a>"
         if slug else ""
     )
 
-    # ── PUBLIC ────────────────────────────────────────────
     public_msg = (
         f"🤖 <b>CLAUDEBOT SIGNAL</b>  {badge} <i>{tier_label}</i>\n"
         f"{'─' * 30}\n"
+        f"{news_flag}"
         f"<b>{trade['market']}</b>\n\n"
         f"{pos_emoji} <b>BUY {trade['position']}</b>\n\n"
         f"📌 Entry: <b>{trade['entry_price']}¢</b>\n"
         f"🎯 Confidence: <b>{trade['confidence']}%</b>\n"
-        f"📐 Sizing: <b>{kelly_pct if kelly_pct else '2% fixed'}</b>\n"
+        f"📐 Sizing: <b>{kelly_pct if kelly_pct else '3% fixed'}</b>\n"
         f"💹 Potential profit: <b>+{profit_pct}%</b>\n"
         f"⏰ Closing: <b>{trade['closes'][:10]}</b>\n\n"
         f"{'─' * 30}\n"
@@ -190,16 +244,16 @@ def telegram_new_trade(trade, state):
     )
     send_telegram(public_msg, TELEGRAM_CHANNEL_ID)
 
-    # ── PRIVATE ───────────────────────────────────────────
     if TELEGRAM_PERSONAL_ID:
         private_msg = (
             f"🤖 <b>CLAUDEBOT — PRIVATE</b>  {badge} {tier_label}\n"
             f"{'─' * 30}\n"
+            f"{news_flag}"
             f"<b>{trade['market']}</b>\n\n"
             f"{pos_emoji} <b>BUY {trade['position']}</b>\n\n"
             f"💰 Entry: <b>{trade['entry_price']}¢</b>  |  True prob: <b>{trade['true_prob']}%</b>\n"
             f"📈 Edge: <b>+{edge}%</b>  |  Confidence: <b>{trade['confidence']}%</b>\n"
-            f"📐 {trade.get('kelly_tier', '2% fixed')}\n"
+            f"📐 {trade.get('kelly_tier', '3% fixed')}\n"
             f"💵 Stake: <b>${trade['stake']:.2f}</b>  →  Win: <b>${trade['potential_return']:.2f}</b>\n"
             f"💹 Profit if wins: <b>+{profit_pct}%</b>\n"
             f"⏰ Closes: <b>{trade['closes'][:10]}</b> ({trade['closes_in_days']:.0f}d)\n\n"
@@ -312,15 +366,129 @@ def should_send_daily_summary(state):
 # ─────────────────────────────────────────────────────────
 
 def should_run_tier2(state):
-    """Tier 2 runs once per day — first scan of each UTC day."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return state.get("last_tier2_scan", "") != today
 
 
 def should_run_tier3(state):
-    """Tier 3 runs once per week — first scan of each UTC week."""
     week = datetime.now(timezone.utc).strftime("%Y-W%W")
     return state.get("last_tier3_scan", "") != week
+
+
+# ─────────────────────────────────────────────────────────
+#  NEWS MONITOR — Step 0
+# ─────────────────────────────────────────────────────────
+
+def scan_news_feeds():
+    if not FEEDPARSER_AVAILABLE:
+        log("⚠️  feedparser not installed — skipping news monitor")
+        return []
+
+    headlines = []
+    cutoff    = datetime.now(timezone.utc) - timedelta(hours=NEWS_LOOKBACK_HOURS)
+
+    for name, url in NEWS_FEEDS:
+        try:
+            feed = feedparser.parse(url)
+            for entry in feed.entries[:15]:
+                published = entry.get("published_parsed")
+                if published:
+                    try:
+                        pub_dt = datetime(*published[:6], tzinfo=timezone.utc)
+                        if pub_dt < cutoff:
+                            continue
+                    except Exception:
+                        pass
+                headlines.append({
+                    "title":   entry.get("title", "")[:150],
+                    "summary": entry.get("summary", "")[:200],
+                    "source":  name,
+                })
+        except Exception as e:
+            log(f"  ⚠️  Feed [{name}]: {e}")
+
+    return headlines
+
+
+def haiku_flag_news(headlines, state):
+    if not headlines:
+        return []
+
+    client       = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    open_markets = [t["market"] for t in state["trades"] if t["status"] == "open"]
+
+    headline_txt = "\n".join(
+        f"[{h['source']}] {h['title']} — {h['summary'][:100]}"
+        for h in headlines[:60]
+    )
+
+    prompt = (
+        f"Monitor breaking news for prediction market trading edge.\n"
+        f"Today: {datetime.now(timezone.utc).strftime('%A %B %d %Y %H:%M UTC')}\n\n"
+        f"HEADLINES (last {NEWS_LOOKBACK_HOURS}h):\n{headline_txt}\n\n"
+        f"ALREADY OPEN (skip these):\n"
+        + ("\n".join(f"  - {m[:70]}" for m in open_markets) or "  None") + "\n\n"
+        f"Flag headlines creating GENUINE POLYMARKET EDGE:\n"
+        f"  ✅ Confirmed fact not yet priced in (withdrawal, resignation, confirmed event)\n"
+        f"  ✅ Health data release with specific numbers (CDC, WHO)\n"
+        f"  ✅ Breaking geopolitical event changing a binary outcome\n"
+        f"  ✅ Economic data release with clear directional signal\n"
+        f"  ✅ Major weather emergency for a tracked city\n"
+        f"  ❌ Sports scores, general commentary, already-open markets\n\n"
+        f"Return ONLY JSON array (empty if nothing actionable):\n"
+        f'[{{"headline":"title","reason":"why edge exists",'
+        f'"search_query":"query to find matching market",'
+        f'"category":"geopolitics|weather|economics|politics|health|other"}}]'
+    )
+
+    try:
+        resp = client.messages.create(
+            model=SCREENER_MODEL,
+            max_tokens=800,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw   = resp.content[0].text.strip().replace("```json", "").replace("```", "").strip()
+        match = re.search(r'\[[\s\S]*\]', raw)
+        flags = json.loads(match.group(0) if match else "[]")
+
+        if flags:
+            log(f"📰 Flagged {len(flags)} news edge(s):")
+            for f in flags:
+                log(f"   🚨 {f.get('headline','')[:70]}")
+        else:
+            log(f"📰 No actionable news in last {NEWS_LOOKBACK_HOURS}h")
+
+        return flags
+    except Exception as e:
+        log(f"⚠️  News flag error: {e}")
+        return []
+
+
+def find_markets_for_news(flags, all_markets):
+    if not flags:
+        return [], all_markets
+
+    priority_ids = set()
+    for flag in flags:
+        query    = flag.get("search_query", "").lower()
+        category = flag.get("category", "")
+        words    = [w for w in query.split() if len(w) > 4]
+
+        for m in all_markets:
+            q   = m["question"].lower()
+            cat = m.get("category") or get_category(m["question"])
+            overlap = sum(1 for w in words if w in q)
+            if overlap >= 2 or (category and cat == category and overlap >= 1):
+                priority_ids.add(m["id"])
+                log(f"   🎯 News match: {m['question'][:60]}")
+
+    priority = [m for m in all_markets if m["id"] in priority_ids]
+    normal   = [m for m in all_markets if m["id"] not in priority_ids]
+
+    if priority:
+        log(f"📰 {len(priority)} priority market(s) bypassing screener")
+
+    return priority, normal
 
 
 # ─────────────────────────────────────────────────────────
@@ -443,8 +611,7 @@ def resolve_open_trades(state):
 # ─────────────────────────────────────────────────────────
 
 def fetch_markets_for_tier(tier_num):
-    """Fetch markets within the hold window for a specific tier."""
-    tcfg = TIERS[tier_num]
+    tcfg     = TIERS[tier_num]
     min_days = tcfg.get("min_hold_days", tcfg.get("min_hold_hours", 2) / 24)
     max_days = tcfg["max_hold_days"]
 
@@ -485,14 +652,10 @@ def fetch_markets_for_tier(tier_num):
         cat = get_category(m["question"])
         if cat in BLOCKED_CATEGORIES:
             continue
-        # Block micro-markets: 5-min crypto flips, odd/even kills, etc.
         q_lower = m["question"].lower()
-        if any(k in q_lower for k in [
-            "up or down", "odd or even", "odd/even", "total kills",
-        ]):
+        if any(k in q_lower for k in ["up or down", "odd or even", "odd/even", "total kills"]):
             skipped += 1
             continue
-        # Block markets closing in under 1 hour (too short to act on)
         if cid < (1 / 24):
             skipped += 1
             continue
@@ -516,52 +679,12 @@ def fetch_markets_for_tier(tier_num):
 #  DIVERSIFICATION
 # ─────────────────────────────────────────────────────────
 
-def get_category(question):
-    q = question.lower()
-    if any(k in q for k in ["temperature", "weather", "rain", "snow", "°c", "°f",
-                              "celsius", "fahrenheit", "precipitation", "humid"]):
-        return "weather"
-    if any(k in q for k in ["bitcoin", "btc", "ethereum", "eth", "crypto",
-                              "solana", "bnb", "xrp", "defi", "sol"]):
-        return "crypto"
-    if any(k in q for k in ["nba", "nfl", "mlb", "nhl", "soccer", "football",
-                              "tennis", "golf", "points", "goals", "score", "match",
-                              "game", "fc ", " united", "spread", "o/u", "rebounds",
-                              "assists", "esport", "valorant", "counter-strike", "dota",
-                              "leverkusen", "barcelona", "atletico", "flyers", "capitals",
-                              "lakers", "celtics", "west brom", "wrexham", "jokic",
-                              "iceho", "rockets", "ahl:", "lol:", "fluxo", "leviatan",
-                              "xspark", "xcrew", "prodigy", "rune eaters", "atputies",
-                              "sinners", "jijiehao", "almeria", "kalieva", "urhobo",
-                              "svrcina", "berrettini", "shinden", "melser", "real madrid",
-                              "chengdu", "qingdao", "monchengladbach", "real sociedad"]):
-        return "sports"
-    if any(k in q for k in ["president", "election", "senate", "congress", "vote",
-                              "government", "minister", "party", "trump", "biden",
-                              "democrat", "republican", "musk", "tweets", "elon",
-                              "policy", "tariff", "doge", "approval", "rogan",
-                              "dana white", "ufc"]):
-        return "politics"
-    if any(k in q for k in ["fed", "rate", "inflation", "gdp", "recession",
-                              "unemployment", "economy", "s&p", "nasdaq", "dow",
-                              "jobs", "robinhood", "hood", "amazon", "amzn",
-                              "stock", "market cap", "earnings"]):
-        return "economics"
-    if any(k in q for k in ["war", "military", "attack", "ceasefire", "hezbollah",
-                              "ukraine", "russia", "israel", "hamas", "conflict",
-                              "kyiv", "kostyantynivka", "borova", "troops", "nato",
-                              "iran", "china", "taiwan", "north korea", "missile"]):
-        return "geopolitics"
-    return "other"
-
-
 def open_positions_for_tier(tier_num, state):
     return [t for t in state["trades"]
             if t["status"] == "open" and t.get("tier", 1) == tier_num]
 
 
 def category_slots_available(category, state):
-    """Max 1 open position per category across ALL tiers."""
     open_trades = [t for t in state["trades"] if t["status"] == "open"]
     cat_count   = sum(
         1 for t in open_trades
@@ -571,7 +694,7 @@ def category_slots_available(category, state):
 
 
 # ─────────────────────────────────────────────────────────
-#  HAIKU SCREENER (shared across Tier 1 and 2)
+#  HAIKU SCREENER  (with diversity cap)
 # ─────────────────────────────────────────────────────────
 
 def haiku_screen(markets, state, tier_num):
@@ -587,29 +710,30 @@ def haiku_screen(markets, state, tier_num):
         return []
 
     mkt_list = "\n".join(
-        f'ID:{m["id"]} | {m["closes_in_days"]:.0f}d | YES={m["yes"]}¢ | Vol=${m["volume"]:,.0f} | "{m["question"]}"'
+        f'ID:{m["id"]} | {m["closes_in_days"]:.0f}d | YES={m["yes"]}¢ | '
+        f'Vol=${m["volume"]:,.0f} | cat:{m["category"]} | "{m["question"]}"'
         for m in candidates
     )
 
     tier_guidance = {
         1: (
-            "Focus on: weather forecasts vs market odds, confirmed facts not yet priced in, "
-            "ongoing verifiable situations (wars, trends). Skip anything where outcome is uncertain "
-            "without a clear information edge."
+            "Prioritise: confirmed facts not yet priced in, weather forecasts clearly "
+            "contradicting odds, ongoing verifiable situations. "
+            "IMPORTANT: pick a DIVERSE mix of categories — do not select 5 weather markets "
+            "when geopolitics, economics, or health markets also have edge."
         ),
         2: (
-            "Focus on: structural mispricings over 8-30 days. Economic trajectories, "
-            "political situations with known timelines, ongoing events with clear directional signals. "
-            "Higher bar than short-term — need strong trajectory evidence."
+            "Prioritise: structural mispricings over 8-30 days. Economic trajectories, "
+            "political situations with known timelines, health outbreak trajectories. "
+            "Pick diverse categories."
         ),
     }.get(tier_num, "")
 
     prompt = (
-        f"You are screening prediction markets for a {TIERS[tier_num]['name'].lower()} trading strategy.\n"
+        f"Screen prediction markets for {TIERS[tier_num]['name'].lower()} strategy.\n"
         f"Today: {datetime.now(timezone.utc).strftime('%Y-%m-%d')}\n\n"
-        f"Score each market 1-10 for MISPRICING POTENTIAL.\n"
-        f"High score = genuine information asymmetry exists.\n"
-        f"Low score = efficient market or no verifiable edge.\n\n"
+        f"Score each 1-10 for MISPRICING POTENTIAL.\n"
+        f"High = genuine information asymmetry. Low = efficient.\n\n"
         f"{tier_guidance}\n\n"
         f"Markets:\n{mkt_list}\n\n"
         f"Return ONLY a JSON array:\n"
@@ -624,25 +748,38 @@ def haiku_screen(markets, state, tier_num):
             max_tokens=2000,
             messages=[{"role": "user", "content": prompt}]
         )
-        raw = resp.content[0].text.strip()
-        raw = raw.replace("```json", "").replace("```", "").strip()
-        # Extract JSON array robustly — handles trailing text after the array
+        raw = resp.content[0].text.strip().replace("```json", "").replace("```", "").strip()
         match = re.search(r'\[[\s\S]*?\](?=\s*$|\s*[^,\[\{])', raw)
         if not match:
             match = re.search(r'\[[\s\S]*\]', raw)
         raw = match.group(0) if match else "[]"
 
-        scores      = json.loads(raw)
+        scores = json.loads(raw)
         scores.sort(key=lambda x: x.get("score", 0), reverse=True)
-        top_n       = tcfg["screener_top_n"]
-        top_ids     = [s["id"] for s in scores[:top_n]]
-        top_markets = [m for m in candidates if m["id"] in top_ids]
 
-        log(f"⚡ [{TIERS[tier_num]['label']}] Selected top {len(top_markets)}:")
-        for s in scores[:top_n]:
+        # ── Diversity cap: max screener_max_per_cat per category ──
+        top_n        = tcfg["screener_top_n"]
+        max_per_cat  = tcfg.get("screener_max_per_cat", 2)
+        seen_cats    = {}
+        diverse_ids  = []
+
+        for s in scores:
             mkt = next((m for m in candidates if m["id"] == s["id"]), None)
-            if mkt:
-                log(f"   {s['score']}/10 — {mkt['question'][:60]}")
+            if not mkt:
+                continue
+            cat = mkt.get("category") or get_category(mkt["question"])
+            if seen_cats.get(cat, 0) < max_per_cat:
+                diverse_ids.append(s["id"])
+                seen_cats[cat] = seen_cats.get(cat, 0) + 1
+            if len(diverse_ids) >= top_n:
+                break
+
+        top_markets = [m for m in candidates if m["id"] in diverse_ids]
+
+        log(f"⚡ [{TIERS[tier_num]['label']}] Selected {len(top_markets)} (diverse):")
+        id_to_score = {s["id"]: s.get("score", 0) for s in scores}
+        for m in top_markets:
+            log(f"   {id_to_score.get(m['id'],0)}/10 [{m['category']}] — {m['question'][:55]}")
 
         return top_markets
 
@@ -652,7 +789,7 @@ def haiku_screen(markets, state, tier_num):
 
 
 # ─────────────────────────────────────────────────────────
-#  DDG SEARCH + HAIKU INTERPRET (Tier 1 and 2)
+#  DDG SEARCH + HAIKU INTERPRET
 # ─────────────────────────────────────────────────────────
 
 def build_search_query(market):
@@ -669,6 +806,8 @@ def build_search_query(market):
         city_match = re.search(r'in ([A-Z][a-zA-Z\s]+?)(?:\s+be|\s+have|\s+reach|\s+exceed)', q)
         city = city_match.group(1).strip() if city_match else q_clean
         return f"{city} weather forecast high temperature {date_full}"
+    elif cat == "health":
+        return f"{q_clean} latest data {month_year}"
     elif cat == "economics":
         q_clean = re.sub(r'between [\$\d,k\s]+and [\$\d,k\s]+', '', q_clean).strip()
         return f"{q_clean} {month_year} forecast"
@@ -716,7 +855,7 @@ def search_market(market):
 def haiku_interpret(client, market, query, raw_results):
     if not raw_results:
         return (
-            f"No search results found. Market: {market['question']} | "
+            f"No search results. Market: {market['question']} | "
             f"Odds: YES={market['yes']}¢. Insufficient data — do not recommend."
         )
 
@@ -728,17 +867,17 @@ def haiku_interpret(client, market, query, raw_results):
     )
 
     prompt = (
-        f"Research analyst brief for prediction market trader.\n\n"
+        f"Research brief for prediction market trader.\n\n"
         f"MARKET: \"{market['question']}\"\n"
         f"ODDS: YES={market['yes']}¢ | NO={100-market['yes']}¢\n"
-        f"CLOSES: {market['closes_in_days']:.0f} days ({market['closes'][:10]})\n"
+        f"CLOSES: {market['closes_in_days']:.0f}d ({market['closes'][:10]})\n"
         f"TODAY: {datetime.now(timezone.utc).strftime('%A %B %d %Y %H:%M UTC')}\n\n"
         f"SEARCH RESULTS:\n{results_txt}\n\n"
-        f"Write a 3-5 sentence factual brief:\n"
-        f"1. Current facts most relevant to YES or NO outcome\n"
-        f"2. What the data implies directionally\n"
-        f"3. Specific numbers, dates, forecasts from the results\n\n"
-        f"Only use search result data. If results are irrelevant, say so clearly."
+        f"3-5 sentence factual brief:\n"
+        f"1. Key current facts relevant to YES/NO\n"
+        f"2. Directional implication\n"
+        f"3. Specific numbers/dates/forecasts\n\n"
+        f"Only use search data. If irrelevant, say so clearly."
     )
 
     try:
@@ -755,7 +894,7 @@ def haiku_interpret(client, market, query, raw_results):
 def research_all_markets(markets):
     client   = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     research = {}
-    log(f"🔬 Researching {len(markets)} markets (DDG + Haiku)...")
+    log(f"🔬 Researching {len(markets)} markets...")
     for i, market in enumerate(markets):
         log(f"  [{i+1}/{len(markets)}] {market['question'][:65]}")
         query, raw = search_market(market)
@@ -770,19 +909,13 @@ def research_all_markets(markets):
 # ─────────────────────────────────────────────────────────
 
 def kelly_size(win_prob, market_win_prob, bankroll, tier_num, closes_in_days=7.0, confidence=75):
-    """
-    For Tier 3 this is unused — fixed_pct is used instead.
-    For Tier 1 and 2, uses tier-specific Kelly tiers with discounts.
-    """
     tcfg = TIERS[tier_num]
-
     if not (0 < market_win_prob < 100) or not (0 < win_prob < 100):
         return 0.0
 
     p = win_prob / 100
     q = 1 - p
     b = (1 - market_win_prob / 100) / (market_win_prob / 100)
-
     if b <= 0:
         return 0.0
 
@@ -790,8 +923,7 @@ def kelly_size(win_prob, market_win_prob, bankroll, tier_num, closes_in_days=7.0
     if full_kelly <= 0:
         return 0.0
 
-    # Pick tier from config
-    fraction = tcfg["kelly"][- 1]["fraction"]
+    fraction = tcfg["kelly"][-1]["fraction"]
     cap_pct  = tcfg["kelly"][-1]["max_pct"]
     for tier in tcfg["kelly"]:
         if confidence >= tier["min_conf"]:
@@ -801,19 +933,15 @@ def kelly_size(win_prob, market_win_prob, bankroll, tier_num, closes_in_days=7.0
 
     sized = full_kelly * fraction
 
-    # Tier 1 short-term discount
     if tier_num == 1:
         if closes_in_days <= 1.0:
             sized *= tcfg.get("short_disc_1d", 0.65)
         elif closes_in_days <= 2.0:
             sized *= tcfg.get("short_disc_2d", 0.80)
-
-    # Tier 2 structural uncertainty discount
     if tier_num == 2:
         sized *= tcfg.get("time_discount", 0.75)
 
-    capped = min(max(sized, 0.0), cap_pct / 100)
-    return round(capped * bankroll, 2)
+    return round(min(max(sized, 0.0), cap_pct / 100) * bankroll, 2)
 
 
 def get_tier_name(confidence, tier_num):
@@ -828,7 +956,26 @@ def get_tier_name(confidence, tier_num):
 
 
 # ─────────────────────────────────────────────────────────
-#  OPUS ANALYST — TIER 1 & 2 (DDG-informed)
+#  JSON PARSE HELPER  (hardened)
+# ─────────────────────────────────────────────────────────
+
+def parse_json_array(text):
+    """Robustly extract a JSON array from Opus output."""
+    text = text.strip().replace("```json", "").replace("```", "").strip()
+    if not text or text in ("{}", "null", ""):
+        return []
+    if not text.startswith("["):
+        match = re.search(r'\[[\s\S]*\]', text)
+        text  = match.group(0) if match else "[]"
+    try:
+        result = json.loads(text)
+        return result if isinstance(result, list) else []
+    except Exception:
+        return []
+
+
+# ─────────────────────────────────────────────────────────
+#  OPUS ANALYST — TIER 1 & 2
 # ─────────────────────────────────────────────────────────
 
 def opus_analyze_short_medium(markets, research, state, tier_num):
@@ -851,36 +998,37 @@ def opus_analyze_short_medium(markets, research, state, tier_num):
     history_ctx = ""
     if closed:
         wr          = len(won) / len(closed) * 100
-        history_ctx = f"\nYOUR {tcfg['name'].upper()} TRACK RECORD: {wr:.0f}% ({len(won)}W/{len(lost)}L)\n\nRecent:\n"
+        history_ctx = f"\nTRACK RECORD [{tcfg['label']}]: {wr:.0f}% ({len(won)}W/{len(lost)}L)\nRecent:\n"
         for t in closed[-8:]:
-            result       = "WON" if t.get("won") else "LOST"
-            edge         = abs(t.get("true_prob", 0) - t.get("market_prob", 0))
+            result = "WON" if t.get("won") else "LOST"
+            edge   = abs(t.get("true_prob", 0) - t.get("market_prob", 0))
             history_ctx += f"  {result} | conf {t.get('confidence',0)}% | edge {edge}% | {t['market'][:55]}\n"
         if lost:
-            history_ctx += "\nLoss patterns to avoid:\n"
+            history_ctx += "\nLoss patterns:\n"
             for t in lost[-4:]:
-                history_ctx += f"  LOST — bear: {t.get('bear_case','?')[:70]}\n"
+                history_ctx += f"  LOST — {t.get('bear_case','?')[:70]}\n"
 
     open_trades = [t for t in state["trades"] if t["status"] == "open"]
     open_ctx    = ""
     if open_trades:
-        open_ctx = "\nALL OPEN POSITIONS (do NOT re-recommend):\n"
+        open_ctx = "\nOPEN POSITIONS (do NOT re-recommend):\n"
         for t in open_trades:
-            open_ctx += f"  [{TIERS[t.get('tier',1)]['label']}] {t['position']} | cat:{t.get('category','?')} | {t['market'][:65]}\n"
+            open_ctx += f"  [{TIERS[t.get('tier',1)]['label']}] {t['position']} | {t.get('category','?')} | {t['market'][:65]}\n"
         cat_counts = {}
         for t in open_trades:
             c = t.get("category") or get_category(t.get("market", ""))
             cat_counts[c] = cat_counts.get(c, 0) + 1
-        open_ctx += f"\nCATEGORY COUNTS: {cat_counts} | MAX PER CATEGORY: {MAX_PER_CATEGORY}"
+        open_ctx += f"\nCATEGORY COUNTS: {cat_counts} | MAX: {MAX_PER_CATEGORY}"
 
     mkt_sections = []
     for m in markets:
-        brief = research.get(m["id"], "No research available.")
+        brief = research.get(m["id"], "No research.")
         mkt_sections.append(
-            f"─── ID:{m['id']} ───\n"
+            f"─── ID:{m['id']} [{m['category']}] ───\n"
             f"Question: \"{m['question']}\"\n"
-            f"Odds: YES={m['yes']}¢ | NO={100-m['yes']}¢ | Vol=${m['volume']:,.0f} | Closes {m['closes'][:10]} ({m['closes_in_days']:.0f}d)\n"
-            f"Live Research: {brief}\n"
+            f"Odds: YES={m['yes']}¢ | NO={100-m['yes']}¢ | Vol=${m['volume']:,.0f} | "
+            f"Closes {m['closes'][:10]} ({m['closes_in_days']:.0f}d)\n"
+            f"Research: {brief}\n"
         )
 
     prompt = (
@@ -889,26 +1037,22 @@ def opus_analyze_short_medium(markets, research, state, tier_num):
         f"BANKROLL: ${state['bankroll']:.2f} | SLOTS: {available} | "
         f"MIN CONF: {tcfg['min_confidence']}% | MIN EDGE: {tcfg['min_edge_pct']}%\n"
         f"{history_ctx}\n{open_ctx}\n\n"
-        f"MARKETS WITH LIVE RESEARCH:\n{''.join(mkt_sections)}\n\n"
-        f"WHAT COUNTS AS REAL EDGE:\n"
-        f"  ✅ Weather forecast clearly contradicts market odds\n"
-        f"  ✅ Confirmed fact not yet priced in (withdrawal, announcement, verified event)\n"
-        f"  ✅ Ongoing verifiable situation with strong directional signal\n"
-        f"  ✅ Economic data with clear trajectory\n"
-        f"  ❌ Vague research, uncertain outcomes, anything sports-related\n"
-        f"  ❌ Crypto price prediction (too efficient)\n\n"
-        f"Be extremely selective. 0 trades is better than a bad trade.\n\n"
-        f"PROBABILITIES: Always report as YES probability (0-100).\n"
-        f"  YES bet: true_prob > market_prob\n"
-        f"  NO bet: true_prob < market_prob\n\n"
-        f"CONFIDENCE: ≥{tcfg['min_confidence']}% required. Below = do not recommend.\n"
+        f"MARKETS:\n{''.join(mkt_sections)}\n\n"
+        f"REAL EDGE only:\n"
+        f"  ✅ Weather forecast clearly contradicts odds\n"
+        f"  ✅ Confirmed fact not priced in\n"
+        f"  ✅ Verifiable situation with strong directional signal\n"
+        f"  ✅ Health/economic data with clear trajectory\n"
+        f"  ❌ Vague research, uncertain outcomes, sports\n\n"
+        f"0 trades beats a bad trade.\n\n"
+        f"PROBABILITIES: report as YES probability (0-100).\n"
+        f"CONFIDENCE: ≥{tcfg['min_confidence']}% required.\n"
         f"DIVERSIFICATION: Max {MAX_PER_CATEGORY} per category across ALL tiers.\n\n"
-        f"Return ONLY valid JSON array:\n"
+        f"Return ONLY valid JSON array ([] if nothing qualifies):\n"
         f'[{{"market_id":"ID","market":"question","position":"YES or NO",'
         f'"market_prob":27,"true_prob":5,"confidence":88,"category":"weather",'
-        f'"research_summary":"facts from research","key_factors":["f1","f2","f3"],'
-        f'"bear_case":"main risk"}}]\n\n'
-        f"If no genuine edge found, return: []"
+        f'"research_summary":"facts","key_factors":["f1","f2","f3"],'
+        f'"bear_case":"risk"}}]'
     )
 
     log(f"🧠 [{tcfg['label']}] Opus analyzing {len(markets)} markets...")
@@ -923,7 +1067,6 @@ def opus_analyze_short_medium(markets, research, state, tier_num):
 
         thinking_txt = ""
         full_text    = ""
-
         for block in response.content:
             if hasattr(block, "type"):
                 if block.type == "thinking":
@@ -932,12 +1075,7 @@ def opus_analyze_short_medium(markets, research, state, tier_num):
                 elif block.type == "text":
                     full_text += block.text
 
-        raw = full_text.strip().replace("```json", "").replace("```", "").strip()
-        if not raw.startswith("["):
-            match = re.search(r'\[[\s\S]*\]', raw)
-            raw = match.group(0) if match else "[]"
-
-        return _validate_recs(json.loads(raw), markets, state, tier_num)
+        return _validate_recs(parse_json_array(full_text), markets, state, tier_num)
 
     except Exception as e:
         log(f"❌ Opus error: {e}")
@@ -945,7 +1083,7 @@ def opus_analyze_short_medium(markets, research, state, tier_num):
 
 
 # ─────────────────────────────────────────────────────────
-#  OPUS ANALYST — TIER 3 (pure structural reasoning, no DDG)
+#  OPUS ANALYST — TIER 3
 # ─────────────────────────────────────────────────────────
 
 def opus_analyze_long(markets, state):
@@ -958,24 +1096,24 @@ def opus_analyze_long(markets, state):
     available = tcfg["max_positions"] - len(open_pos)
 
     if available <= 0:
-        log(f"[T3] Max long-term positions reached")
+        log("[T3] Max long-term positions reached")
         return []
 
     open_trades = [t for t in state["trades"] if t["status"] == "open"]
     open_ctx    = ""
     if open_trades:
-        open_ctx = "\nALL OPEN POSITIONS (do NOT re-recommend):\n"
+        open_ctx = "\nOPEN POSITIONS (do NOT re-recommend):\n"
         for t in open_trades:
-            open_ctx += f"  [{TIERS[t.get('tier',1)]['label']}] {t['position']} | cat:{t.get('category','?')} | {t['market'][:65]}\n"
+            open_ctx += f"  [{TIERS[t.get('tier',1)]['label']}] {t['position']} | {t.get('category','?')} | {t['market'][:65]}\n"
         cat_counts = {}
         for t in open_trades:
             c = t.get("category") or get_category(t.get("market", ""))
             cat_counts[c] = cat_counts.get(c, 0) + 1
-        open_ctx += f"\nCATEGORY COUNTS: {cat_counts} | MAX PER CATEGORY: {MAX_PER_CATEGORY}"
+        open_ctx += f"\nCATEGORY COUNTS: {cat_counts} | MAX: {MAX_PER_CATEGORY}"
 
     mkt_list = "\n".join(
         f'ID:{m["id"]} | YES={m["yes"]}¢ NO={100-m["yes"]}¢ | Vol=${m["volume"]:,.0f} | '
-        f'Closes {m["closes"][:10]} ({m["closes_in_days"]:.0f}d) | "{m["question"]}"'
+        f'Closes {m["closes"][:10]} ({m["closes_in_days"]:.0f}d) | [{m["category"]}] "{m["question"]}"'
         for m in markets
     )
 
@@ -984,40 +1122,25 @@ def opus_analyze_long(markets, state):
         f"TODAY: {datetime.now(timezone.utc).strftime('%A %B %d %Y %H:%M UTC')}\n"
         f"BANKROLL: ${state['bankroll']:.2f} | SLOTS: {available}\n"
         f"MIN CONFIDENCE: {tcfg['min_confidence']}% | MIN EDGE: {tcfg['min_edge_pct']}%\n"
-        f"SIZING: Fixed {tcfg['fixed_pct']}% per trade (Kelly is false precision at 6 months)\n"
+        f"SIZING: Fixed {tcfg['fixed_pct']}% per trade\n"
         f"{open_ctx}\n\n"
-        f"LONG-TERM MARKETS TO ANALYZE:\n{mkt_list}\n\n"
-        f"YOUR TASK: Use your knowledge of current world events, historical base rates, "
-        f"and trajectory analysis to find genuine long-term mispricings.\n\n"
-        f"WHAT MAKES A GOOD LONG-TERM TRADE:\n"
-        f"  ✅ Geopolitical situations with clear momentum (territory control, ongoing conflicts)\n"
-        f"  ✅ Political outcomes where fundamentals strongly favor one outcome\n"
-        f"  ✅ Economic trends with strong leading indicators over multi-month horizon\n"
-        f"  ✅ Binary events that are either near-certain or near-impossible given current trajectory\n"
-        f"  ✅ Markets where the crowd is anchored to an old narrative that data contradicts\n\n"
-        f"  ❌ Anything that could easily flip in 3-6 months due to unpredictable events\n"
-        f"  ❌ Sports, esports, crypto prices — too noisy\n"
-        f"  ❌ Markets where genuine uncertainty is high and you have no informational edge\n\n"
-        f"THINK CAREFULLY about:\n"
-        f"  - What base rates apply? What has historically happened in similar situations?\n"
-        f"  - What is the current trajectory? Is it accelerating or decelerating?\n"
-        f"  - What would need to happen for the market to be wrong? How likely is that?\n"
-        f"  - Is the market priced as if it's uncertain when the outcome is actually skewed?\n\n"
-        f"CONFIDENCE GUIDE for long-term:\n"
-        f"  90-95%: Strong structural factors, clear trajectory, limited plausible reversals\n"
-        f"  95-99%: Near-certain based on current facts and historical base rates\n"
-        f"  Below 90%: Do NOT recommend — insufficient conviction for a 6-month hold\n\n"
-        f"DIVERSIFICATION: Max {MAX_PER_CATEGORY} per category across ALL tiers.\n\n"
-        f"Return ONLY valid JSON array:\n"
+        f"MARKETS:\n{mkt_list}\n\n"
+        f"Use knowledge of current events, base rates, and trajectory analysis "
+        f"to find genuine long-term mispricings.\n\n"
+        f"GOOD TRADES: geopolitical momentum, political fundamentals, economic trends, "
+        f"health outbreak trajectories, near-certain or near-impossible binary events.\n"
+        f"BAD TRADES: sports, crypto, anything easily reversed in 6 months.\n\n"
+        f"Think: base rates, current trajectory, what reversal requires, crowd anchoring.\n\n"
+        f"CONFIDENCE ≥90% required. Below 90% = do NOT recommend.\n"
+        f"DIVERSIFICATION: Max {MAX_PER_CATEGORY} per category.\n\n"
+        f"Return ONLY valid JSON array ([] if nothing qualifies):\n"
         f'[{{"market_id":"ID","market":"question","position":"YES or NO",'
         f'"market_prob":27,"true_prob":5,"confidence":92,"category":"geopolitics",'
-        f'"research_summary":"your structural reasoning for this trade",'
-        f'"key_factors":["base rate factor","trajectory factor","market mispricing reason"],'
-        f'"bear_case":"what could invalidate this thesis in the next 6 months"}}]\n\n'
-        f"If no market meets the 90%+ confidence + 25%+ edge standard, return: []"
+        f'"research_summary":"structural reasoning","key_factors":["f1","f2","f3"],'
+        f'"bear_case":"what invalidates thesis"}}]'
     )
 
-    log(f"🧠 [T3] Opus analyzing {len(markets)} long-term markets (pure reasoning)...")
+    log(f"🧠 [T3] Opus analyzing {len(markets)} long-term markets...")
 
     try:
         response = client.messages.create(
@@ -1029,7 +1152,6 @@ def opus_analyze_long(markets, state):
 
         thinking_txt = ""
         full_text    = ""
-
         for block in response.content:
             if hasattr(block, "type"):
                 if block.type == "thinking":
@@ -1039,13 +1161,7 @@ def opus_analyze_long(markets, state):
                     full_text += block.text
 
         log(f"  📊 Thinking depth: {len(thinking_txt)} chars")
-
-        raw = full_text.strip().replace("```json", "").replace("```", "").strip()
-        if not raw.startswith("["):
-            match = re.search(r'\[[\s\S]*\]', raw)
-            raw = match.group(0) if match else "[]"
-
-        return _validate_recs(json.loads(raw), markets, state, 3)
+        return _validate_recs(parse_json_array(full_text), markets, state, 3)
 
     except Exception as e:
         log(f"❌ Opus T3 error: {e}")
@@ -1053,7 +1169,7 @@ def opus_analyze_long(markets, state):
 
 
 # ─────────────────────────────────────────────────────────
-#  RECOMMENDATION VALIDATION (shared)
+#  RECOMMENDATION VALIDATION
 # ─────────────────────────────────────────────────────────
 
 def _validate_recs(recs, markets, state, tier_num):
@@ -1073,10 +1189,10 @@ def _validate_recs(recs, markets, state, tier_num):
             continue
         cat = r.get("category") or get_category(r.get("market", ""))
         if cat in BLOCKED_CATEGORIES:
-            log(f"  ⛔ Category '{cat}' blocked — {r.get('market','')[:50]}")
+            log(f"  ⛔ '{cat}' blocked — {r.get('market','')[:50]}")
             continue
         if not category_slots_available(cat, state):
-            log(f"  ⏭  Category '{cat}' full — {r.get('market','')[:50]}")
+            log(f"  ⏭  '{cat}' full — {r.get('market','')[:50]}")
             continue
         valid.append(r)
 
@@ -1084,7 +1200,8 @@ def _validate_recs(recs, markets, state, tier_num):
     for r in valid:
         edge = abs(r.get("true_prob", 0) - r.get("market_prob", 0))
         cat  = r.get("category") or get_category(r.get("market", ""))
-        log(f"  📋 BUY {r['position']} | {cat} | conf {r['confidence']}% | edge {edge}% | YES_mkt={r['market_prob']}% → true={r['true_prob']}%")
+        log(f"  📋 BUY {r['position']} | {cat} | conf {r['confidence']}% | edge {edge}% | "
+            f"YES_mkt={r['market_prob']}% → true={r['true_prob']}%")
         log(f"     {r['market'][:70]}")
         log(f"     {r.get('research_summary','')[:110]}")
         log(f"     Bear: {r.get('bear_case','')[:75]}")
@@ -1096,34 +1213,29 @@ def _validate_recs(recs, markets, state, tier_num):
 #  TRADE EXECUTION
 # ─────────────────────────────────────────────────────────
 
-def place_paper_trade(rec, markets, state, tier_num):
+def place_paper_trade(rec, markets, state, tier_num, news_triggered=False):
     tcfg = TIERS[tier_num]
     conf = rec.get("confidence", 0)
 
     if conf < tcfg["min_confidence"]:
         log(f"  ⏭  Conf {conf}% < {tcfg['min_confidence']}%")
         return state
-
     if rec.get("market_id") in {t["market_id"] for t in state["trades"] if t["status"] == "open"}:
-        log(f"  ⏭  Already open in this market")
+        log(f"  ⏭  Already open")
         return state
-
     if len(open_positions_for_tier(tier_num, state)) >= tcfg["max_positions"]:
-        log(f"  ⏭  [{tcfg['label']}] Max positions ({tcfg['max_positions']}) reached")
+        log(f"  ⏭  [{tcfg['label']}] Max positions")
         return state
-
     if state.get("daily_loss", 0) >= DAILY_LOSS_LIMIT:
-        log(f"  🛑 Daily loss limit hit")
+        log(f"  🛑 Daily loss limit")
         return state
 
     cat = rec.get("category") or get_category(rec.get("market", ""))
-
     if cat in BLOCKED_CATEGORIES:
-        log(f"  ⛔ Category '{cat}' blocked")
+        log(f"  ⛔ '{cat}' blocked")
         return state
-
     if not category_slots_available(cat, state):
-        log(f"  ⏭  Category '{cat}' full")
+        log(f"  ⏭  '{cat}' full")
         return state
 
     mkt = next((m for m in markets if m["id"] == rec["market_id"]), None)
@@ -1136,31 +1248,23 @@ def place_paper_trade(rec, markets, state, tier_num):
         log(f"  ⏭  Cannot parse close date")
         return state
 
-    cid = (end_dt - datetime.now(timezone.utc)).total_seconds() / 86400
+    cid   = (end_dt - datetime.now(timezone.utc)).total_seconds() / 86400
     min_d = tcfg.get("min_hold_days", tcfg.get("min_hold_hours", 2) / 24)
     if cid < min_d or cid > tcfg["max_hold_days"]:
-        log(f"  ⏭  Closes in {cid:.1f}d — outside [{min_d:.1f}, {tcfg['max_hold_days']}d] window")
+        log(f"  ⏭  {cid:.1f}d outside window")
         return state
 
     yes_true   = rec["true_prob"]
     yes_market = rec["market_prob"]
 
-    # ── SIZING ────────────────────────────────────────────
     if tcfg.get("fixed_pct"):
-        # Tier 3: fixed percentage
-        stake = round(state["bankroll"] * tcfg["fixed_pct"] / 100, 2)
+        stake      = round(state["bankroll"] * tcfg["fixed_pct"] / 100, 2)
         tier_label = f"fixed {tcfg['fixed_pct']}%"
     else:
-        # Tier 1 & 2: Kelly-based
-        if rec["position"] == "NO":
-            kw = 100 - yes_true
-            km = 100 - yes_market
-        else:
-            kw = yes_true
-            km = yes_market
-
-        log(f"  📐 Kelly [{tcfg['label']}]: position={rec['position']} | win_prob={kw}% | market={km}%")
-        stake = kelly_size(kw, km, state["bankroll"], tier_num, cid, conf)
+        kw = (100 - yes_true)   if rec["position"] == "NO" else yes_true
+        km = (100 - yes_market) if rec["position"] == "NO" else yes_market
+        log(f"  📐 Kelly [{tcfg['label']}]: {rec['position']} | win={kw}% | market={km}%")
+        stake      = kelly_size(kw, km, state["bankroll"], tier_num, cid, conf)
         tier_label = get_tier_name(conf, tier_num)
 
     if stake < 1.00:
@@ -1192,6 +1296,7 @@ def place_paper_trade(rec, markets, state, tier_num):
         "key_factors":      rec.get("key_factors", []),
         "bear_case":        rec.get("bear_case", ""),
         "kelly_tier":       tier_label,
+        "news_triggered":   news_triggered,
         "status":           "open",
         "placed_at":        datetime.now(timezone.utc).isoformat(),
         "paper":            True,
@@ -1201,9 +1306,11 @@ def place_paper_trade(rec, markets, state, tier_num):
     state["bankroll"] = round(state["bankroll"] - stake, 2)
     state["trades"].append(trade)
 
-    log(f"  ✅ [{tcfg['label']}] BET PLACED — {trade['position']} @ {entry}¢  [{tier_label}]")
+    flag = "📰 " if news_triggered else ""
+    log(f"  ✅ [{tcfg['label']}] {flag}BET — {trade['position']} @ {entry}¢  [{tier_label}]")
     log(f"     {trade['market'][:70]}")
-    log(f"     {cat} | Closes {end_dt.strftime('%b %d')} ({cid:.0f}d) | Stake ${stake:.2f} | Win ${payout:.2f} | Conf {conf}%")
+    log(f"     {cat} | Closes {end_dt.strftime('%b %d')} ({cid:.0f}d) | "
+        f"Stake ${stake:.2f} | Win ${payout:.2f} | Conf {conf}%")
     log(f"     Bankroll now ${state['bankroll']:.2f}")
 
     telegram_new_trade(trade, state)
@@ -1225,7 +1332,7 @@ def print_portfolio(state):
     roi      = (state["bankroll"] - STARTING_BANKROLL) / STARTING_BANKROLL * 100
 
     print("\n" + "═" * 65)
-    print("  CLAUDEBOT v12  ·  Three-Tier  ·  DDG + Haiku + Opus 4.6")
+    print("  CLAUDEBOT v13  ·  Three-Tier + News Monitor")
     print("═" * 65)
     print(f"  Bankroll       ${state['bankroll']:.2f}  ({roi:+.1f}% ROI)")
     print(f"  Realized P&L   ${realized:+.2f}")
@@ -1235,8 +1342,10 @@ def print_portfolio(state):
     for tn in [1, 2, 3]:
         op = len(open_positions_for_tier(tn, state))
         mx = TIERS[tn]["max_positions"]
-        print(f"  {tier_badge(tn)} T{tn} {TIERS[tn]['name']:<12} {op}/{mx} open | conf≥{TIERS[tn]['min_confidence']}% | edge≥{TIERS[tn]['min_edge_pct']}%")
+        print(f"  {tier_badge(tn)} T{tn} {TIERS[tn]['name']:<12} {op}/{mx} open | "
+              f"conf≥{TIERS[tn]['min_confidence']}% | edge≥{TIERS[tn]['min_edge_pct']}%")
 
+    print(f"  📰 News        {'✅ active' if FEEDPARSER_AVAILABLE else '❌ pip install feedparser'}")
     print(f"  DDG            {'✅ available' if DDG_AVAILABLE else '❌ not installed'}")
     print(f"  Telegram       {'✅ configured' if TELEGRAM_BOT_TOKEN else '❌ not configured'}")
     print("═" * 65)
@@ -1249,7 +1358,9 @@ def print_portfolio(state):
             closes_str = close_dt.strftime("%b %d") if close_dt else "?"
             cat        = t.get("category", "?")
             badge      = tier_badge(t.get("tier", 1))
-            print(f"  {badge} {t['position']} | ${t['stake']:.2f} | {cat} | {closes_str} ({cid}d) | {t['market'][:40]}")
+            news_flag  = "📰" if t.get("news_triggered") else ""
+            print(f"  {badge}{news_flag} {t['position']} | ${t['stake']:.2f} | {cat} | "
+                  f"{closes_str} ({cid}d) | {t['market'][:40]}")
     print()
 
 
@@ -1257,7 +1368,7 @@ def print_portfolio(state):
 #  RUN TIER
 # ─────────────────────────────────────────────────────────
 
-def run_tier(tier_num, state):
+def run_tier(tier_num, state, priority_markets=None):
     tcfg = TIERS[tier_num]
     log(f"{'─'*50}")
     log(f"🔄 Running {tcfg['name']} (T{tier_num}) scan")
@@ -1267,12 +1378,25 @@ def run_tier(tier_num, state):
         log(f"[T{tier_num}] No markets in window")
         return state
 
+    # Priority markets from news bypass screener (T1 only)
+    if priority_markets and tier_num == 1:
+        valid_ids      = {m["id"] for m in markets}
+        priority_valid = [m for m in priority_markets if m["id"] in valid_ids]
+
+        if priority_valid:
+            log(f"📰 Processing {len(priority_valid)} news-priority market(s)...")
+            p_research = research_all_markets(priority_valid)
+            p_recs     = opus_analyze_short_medium(priority_valid, p_research, state, 1)
+            for rec in p_recs:
+                state = place_paper_trade(rec, markets, state, 1, news_triggered=True)
+
+        priority_ids = {m["id"] for m in priority_valid} if priority_markets else set()
+        markets      = [m for m in markets if m["id"] not in priority_ids]
+
     if tier_num == 3:
-        # Long-term: skip screener and DDG, go straight to Opus reasoning
-        log(f"🧠 [T3] Passing all {len(markets)} markets directly to Opus (pure reasoning)...")
+        log(f"🧠 [T3] Passing {len(markets)} markets to Opus (pure reasoning)...")
         recs = opus_analyze_long(markets, state)
     else:
-        # Short and medium: screen then DDG research then Opus
         top = haiku_screen(markets, state, tier_num)
         if not top:
             log(f"[T{tier_num}] No candidates after screening")
@@ -1296,7 +1420,7 @@ def run_tier(tier_num, state):
 def single_scan():
     now = datetime.now(timezone.utc)
     print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  CLAUDEBOT v12  ·  Three-Tier Trading System             ║")
+    print("║  CLAUDEBOT v13  ·  Three-Tier + News Monitor             ║")
     print(f"║  {now.strftime('%Y-%m-%d %H:%M UTC')}  |  T1 always | T2 daily | T3 weekly  ║")
     print("╚══════════════════════════════════════════════════════════╝\n")
 
@@ -1315,28 +1439,39 @@ def single_scan():
     if should_send_daily_summary(state):
         telegram_daily_summary(state)
 
+    # ── Step 0: News monitor ──────────────────────────────
+    log("── Step 0: News monitor ─────────────────────────────────")
+    headlines        = scan_news_feeds()
+    news_flags       = haiku_flag_news(headlines, state) if headlines else []
+    priority_markets = []
+
+    if news_flags:
+        t1_markets           = fetch_markets_for_tier(1)
+        priority_markets, _  = find_markets_for_news(news_flags, t1_markets)
+
+    # ── Step 1: Resolve ───────────────────────────────────
     log("── Resolve open trades ──────────────────────────────────")
     state = resolve_open_trades(state)
 
-    # ── TIER 1 — always runs ──────────────────────────────
+    # ── Tier 1 — always ──────────────────────────────────
     log("── Tier 1: Short-term (1-7 days) ────────────────────────")
-    state = run_tier(1, state)
+    state = run_tier(1, state, priority_markets=priority_markets)
 
-    # ── TIER 2 — once daily at 9am UTC ────────────────────
+    # ── Tier 2 — once daily ───────────────────────────────
     if should_run_tier2(state):
         log("── Tier 2: Medium-term (8-30 days) ──────────────────────")
         state = run_tier(2, state)
         state["last_tier2_scan"] = now.strftime("%Y-%m-%d")
     else:
-        log("── Tier 2: Skipped (runs once daily at 9am UTC) ─────────")
+        log("── Tier 2: Skipped (already ran today) ──────────────────")
 
-    # ── TIER 3 — once weekly on Sunday ────────────────────
+    # ── Tier 3 — once weekly ──────────────────────────────
     if should_run_tier3(state):
         log("── Tier 3: Long-term (31-180 days) ──────────────────────")
         state = run_tier(3, state)
         state["last_tier3_scan"] = now.strftime("%Y-W%W")
     else:
-        log("── Tier 3: Skipped (runs once weekly on Sunday) ─────────")
+        log("── Tier 3: Skipped (already ran this week) ──────────────")
 
     log("── Save ──────────────────────────────────────────────────")
     save_state(state)
@@ -1345,8 +1480,8 @@ def single_scan():
 
 def run_loop():
     print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  CLAUDEBOT v12  ·  Three-Tier  ·  Continuous Mode        ║")
-    print(f"║  Interval: {SCAN_INTERVAL_MINS}min  |  T1 every run | T2 daily | T3 weekly ║")
+    print("║  CLAUDEBOT v13  ·  Three-Tier + News Monitor             ║")
+    print(f"║  Interval: {SCAN_INTERVAL_MINS}min | T1 every | T2 daily | T3 weekly  ║")
     print("╚══════════════════════════════════════════════════════════╝\n")
 
     if not ANTHROPIC_API_KEY:
