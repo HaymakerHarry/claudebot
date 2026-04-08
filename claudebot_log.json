@@ -1,5 +1,5 @@
 {
-  "bankroll": 1107.06,
+  "bankroll": 1000.09,
   "trades": [
     {
       "id": "T1775098669",
@@ -353,11 +353,42 @@
       "placed_at": "2026-04-07T19:17:41.249376+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1775676619",
+      "tier": 1,
+      "market_id": "1831449",
+      "market_slug": "bitcoin-above-72k-on-april-9",
+      "market": "Will the price of Bitcoin be above $72,000 on April 9?",
+      "position": "YES",
+      "entry_price": 26,
+      "stake": 106.97,
+      "potential_return": 411.42,
+      "potential_profit": 304.45,
+      "confidence": 78,
+      "true_prob": 48,
+      "market_prob": 26,
+      "category": "crypto",
+      "closes_in_days": 0.9,
+      "closes": "2026-04-09T16:00:00+00:00",
+      "research_summary": "Cross-referenced research from concurrent BTC market shows Bitcoin at $71,838 as of April 8 \u2014 only $162 (0.23%) below the $72,000 threshold. CoinCodex weekly forecast predicts BTC range of $72,169-$78,309 this week, directionally supportive. Normal daily BTC volatility of 2-5% makes a 0.23% move highly likely in either direction, giving roughly coin-flip odds.",
+      "key_factors": [
+        "BTC at $71,838 on Apr 8 per concurrent market research \u2014 only 0.23% below $72K target",
+        "Daily BTC volatility (2-5%) dwarfs the $162 gap to threshold",
+        "CoinCodex weekly forecast range of $72,169-$78,309 supports upward movement into target"
+      ],
+      "bear_case": "Market's $97K volume suggests informed traders may have more current pricing data showing BTC has retreated below $71K; $72K could be a technical resistance level with significant sell wall; research price ($71,838) may be stale by several hours",
+      "kelly_tier": "half-Kelly (10.0%)",
+      "news_triggered": false,
+      "status": "open",
+      "placed_at": "2026-04-08T19:30:19.030089+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-04-08",
-  "scan_count": 52,
+  "scan_count": 53,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-05",
   "last_tier2_scan": "2026-04-08",
