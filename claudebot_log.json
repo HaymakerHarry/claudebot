@@ -189,10 +189,13 @@
       ],
       "bear_case": "Severe Western Disturbance or unprecedented pre-monsoon storm system could suppress temps, and I previously lost a Lucknow weather bet on unexpected weather changes \u2014 but a 9\u00b0C drop in highs far exceeds typical weather-system cooling of 5-7\u00b0C",
       "kelly_tier": "half-Kelly (10.0%)",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-04T13:15:37.096109+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": false,
+      "resolved_at": "2026-04-08T21:52:19.356959+00:00",
+      "realized_pnl": -155.57
     },
     {
       "id": "T1775359671",
@@ -386,9 +389,9 @@
       "model": "claude-opus-4-6"
     }
   ],
-  "daily_loss": 0.0,
+  "daily_loss": 155.57,
   "daily_reset": "2026-04-08",
-  "scan_count": 53,
+  "scan_count": 54,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-05",
   "last_tier2_scan": "2026-04-08",
