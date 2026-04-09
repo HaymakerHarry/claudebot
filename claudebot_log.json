@@ -1,5 +1,5 @@
 {
-  "bankroll": 900.08,
+  "bankroll": 1311.5,
   "trades": [
     {
       "id": "T1775098669",
@@ -383,10 +383,13 @@
       "bear_case": "Market's $97K volume suggests informed traders may have more current pricing data showing BTC has retreated below $71K; $72K could be a technical resistance level with significant sell wall; research price ($71,838) may be stale by several hours",
       "kelly_tier": "half-Kelly (10.0%)",
       "news_triggered": false,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-08T19:30:19.030089+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-04-09T21:51:49.299957+00:00",
+      "realized_pnl": 304.45
     },
     {
       "id": "T1775721131",
@@ -422,7 +425,7 @@
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-04-09",
-  "scan_count": 61,
+  "scan_count": 62,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-05",
   "last_tier2_scan": "2026-04-09",
