@@ -1,5 +1,5 @@
 {
-  "bankroll": 1301.98,
+  "bankroll": 1518.97,
   "trades": [
     {
       "id": "T1775098669",
@@ -320,10 +320,13 @@
       "bear_case": "Zelenskyy could go dark for security reasons, have connectivity/health issues, or platform changes could affect post counting methodology. Ceasefire deal could reduce communication urgency.",
       "kelly_tier": "half-Kelly (10.0%)",
       "news_triggered": true,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-07T16:14:55.199482+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-04-11T18:57:50.178284+00:00",
+      "realized_pnl": 36.33
     },
     {
       "id": "T1775589461",
@@ -452,15 +455,50 @@
       "bear_case": "Official weather station could record a lower reading than city-wide forecast if located in a cooler microclimate, or an unexpected cold front arrival could suppress the high, though both are very unlikely given the 2\u00b0C margin and same-day timing.",
       "kelly_tier": "half-Kelly (10.0%)",
       "news_triggered": false,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-11T02:55:28.531751+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-04-11T18:57:51.996450+00:00",
+      "realized_pnl": 68.08
+    },
+    {
+      "id": "T1775934039",
+      "tier": 1,
+      "market_id": "1914818",
+      "market_slug": "highest-temperature-in-buenos-aires-on-april-12-2026-25c",
+      "market": "Will the highest temperature in Buenos Aires be 25\u00b0C on April 12?",
+      "position": "NO",
+      "entry_price": 68,
+      "stake": 168.77,
+      "potential_return": 248.19,
+      "potential_profit": 79.42,
+      "confidence": 77,
+      "true_prob": 15,
+      "market_prob": 32,
+      "category": "weather",
+      "closes_in_days": 0.7,
+      "closes": "2026-04-12T12:00:00+00:00",
+      "research_summary": "April climatological highs in Buenos Aires center around 20-22\u00b0C across multiple sources. 25\u00b0C sits ~3\u00b0C above the mean, placing it in the upper tail. Even with generous forecast assumptions (forecast of 25\u00b0C, \u00b12\u00b0C uncertainty), the probability of the high landing on exactly 25\u00b0C stays below 20%. Climatological calculation using N(22, 3.5\u00b2) yields ~8% for this exact temperature.",
+      "key_factors": [
+        "April average high in Buenos Aires is 20-22\u00b0C; 25\u00b0C is a warm outlier",
+        "Exact integer temperature match has inherently low probability (~8-20% depending on forecast)",
+        "Research explicitly notes 32% odds 'appear somewhat generous' given data",
+        "Even best-case forecast scenario (mean=25\u00b0C) yields only ~20% exact-hit probability"
+      ],
+      "bear_case": "No day-specific forecast available; if a warm air mass pushes forecast to 25-26\u00b0C, true probability could reach 18-22%, reducing edge below threshold",
+      "kelly_tier": "half-Kelly (10.0%)",
+      "news_triggered": false,
+      "status": "open",
+      "placed_at": "2026-04-11T19:00:39.400031+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-04-11",
-  "scan_count": 75,
+  "scan_count": 76,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-11",
   "last_tier2_scan": "2026-04-11",
