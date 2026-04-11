@@ -1,5 +1,5 @@
 {
-  "bankroll": 1446.65,
+  "bankroll": 1301.98,
   "trades": [
     {
       "id": "T1775098669",
@@ -424,13 +424,45 @@
       "won": true,
       "resolved_at": "2026-04-10T07:53:19.810915+00:00",
       "realized_pnl": 35.14
+    },
+    {
+      "id": "T1775876128",
+      "tier": 1,
+      "market_id": "1901704",
+      "market_slug": "highest-temperature-in-seoul-on-april-11-2026-15c",
+      "market": "Will the highest temperature in Seoul be 15\u00b0C on April 11?",
+      "position": "NO",
+      "entry_price": 68,
+      "stake": 144.67,
+      "potential_return": 212.75,
+      "potential_profit": 68.08,
+      "confidence": 83,
+      "true_prob": 10,
+      "market_prob": 32,
+      "category": "weather",
+      "closes_in_days": 0.4,
+      "closes": "2026-04-11T12:00:00+00:00",
+      "research_summary": "Forecast for Seoul on April 11 shows a high of 17\u00b0C. At 02:54 UTC it is already 11:54 AM local time in Seoul, meaning the daily high is only 2-4 hours away and same-day forecasts are extremely accurate (\u00b11\u00b0C). Historical average high for this date is 16.6\u00b0C. Both the forecast and climatology are 2\u00b0C above the required exact 15\u00b0C threshold.",
+      "key_factors": [
+        "Specific same-day forecast of 17\u00b0C is 2\u00b0C above the 15\u00b0C threshold \u2014 too large a gap for typical forecast error",
+        "Already late morning in Seoul \u2014 remaining forecast uncertainty is minimal (\u00b11\u00b0C at most)",
+        "Historical average of 16.6\u00b0C independently confirms temps above 15\u00b0C are typical for this date",
+        "Exact temperature match required makes YES resolution even less likely"
+      ],
+      "bear_case": "Official weather station could record a lower reading than city-wide forecast if located in a cooler microclimate, or an unexpected cold front arrival could suppress the high, though both are very unlikely given the 2\u00b0C margin and same-day timing.",
+      "kelly_tier": "half-Kelly (10.0%)",
+      "news_triggered": false,
+      "status": "open",
+      "placed_at": "2026-04-11T02:55:28.531751+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
   "daily_loss": 0.0,
-  "daily_reset": "2026-04-10",
-  "scan_count": 69,
+  "daily_reset": "2026-04-11",
+  "scan_count": 70,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-05",
-  "last_tier2_scan": "2026-04-10",
+  "last_tier2_scan": "2026-04-11",
   "last_tier3_scan": "2026-W14"
 }
