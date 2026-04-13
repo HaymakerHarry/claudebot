@@ -1,5 +1,5 @@
 {
-  "bankroll": 1197.63,
+  "bankroll": 1436.1,
   "trades": [
     {
       "id": "T1775098669",
@@ -591,10 +591,13 @@
       "bear_case": "Warmer-than-forecast afternoon spike or slight model undershoot could push to exactly 30\u00b0C; Shenzhen urban heat island effect",
       "kelly_tier": "half-Kelly (10.0%)",
       "news_triggered": false,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-13T00:02:37.767914+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-04-13T10:53:02.663272+00:00",
+      "realized_pnl": 90.62
     },
     {
       "id": "T1776038559",
@@ -631,7 +634,7 @@
   ],
   "daily_loss": 123.01,
   "daily_reset": "2026-04-13",
-  "scan_count": 87,
+  "scan_count": 88,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-12",
   "last_tier2_scan": "2026-04-13",
