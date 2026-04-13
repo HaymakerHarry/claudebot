@@ -1,5 +1,5 @@
 {
-  "bankroll": 1436.1,
+  "bankroll": 1707.35,
   "trades": [
     {
       "id": "T1775098669",
@@ -528,10 +528,13 @@
       "bear_case": "Hungarian polls have historically underestimated Fidesz (2022 precedent); gerrymandered single-member districts could favor Fidesz more than proportional models suggest; rural turnout and media dominance could produce systematic polling error",
       "kelly_tier": "half-Kelly (10.0%)",
       "news_triggered": false,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-11T21:42:25.215278+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-04-13T21:55:48.507911+00:00",
+      "realized_pnl": 119.35
     },
     {
       "id": "T1776020593",
@@ -560,10 +563,13 @@
       "bear_case": "Crypto markets are 24/7 and highly volatile \u2014 a sudden positive catalyst (e.g., ceasefire, tariff rollback) could trigger a sharp intraday rally above $70K. Research may also lack the most current intraday price if BTC has already begun recovering.",
       "kelly_tier": "half-Kelly (10.0%)",
       "news_triggered": false,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-12T19:03:13.793026+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": false,
+      "resolved_at": "2026-04-13T21:55:49.656650+00:00",
+      "realized_pnl": -136.71
     },
     {
       "id": "T1776038557",
@@ -632,9 +638,9 @@
       "model": "claude-opus-4-6"
     }
   ],
-  "daily_loss": 123.01,
+  "daily_loss": 259.72,
   "daily_reset": "2026-04-13",
-  "scan_count": 91,
+  "scan_count": 92,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-12",
   "last_tier2_scan": "2026-04-13",
