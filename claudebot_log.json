@@ -1,5 +1,5 @@
 {
-  "bankroll": 1663.99,
+  "bankroll": 1980.04,
   "trades": [
     {
       "id": "T1775098669",
@@ -702,10 +702,13 @@
       "bear_case": "An unusually strong warm air mass from the south or foehn-type effect could push temperatures well above average; however, even hitting 20+\u00b0C would not guarantee landing on exactly 23\u00b0C",
       "kelly_tier": "half-Kelly (10.0%)",
       "news_triggered": false,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-14T22:00:46.692998+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": true,
+      "resolved_at": "2026-04-15T19:38:18.337563+00:00",
+      "realized_pnl": 110.62
     },
     {
       "id": "T1776261496",
@@ -741,7 +744,7 @@
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-04-15",
-  "scan_count": 104,
+  "scan_count": 105,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-12",
   "last_tier2_scan": "2026-04-15",
