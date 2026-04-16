@@ -441,17 +441,30 @@ def haiku_news_screen(markets, headlines):
 # ─────────────────────────────────────────────────────────
 
 def fetch_markets():
-    try:
-        r = requests.get(
-            "https://gamma-api.polymarket.com/markets"
-            "?active=true&closed=false&limit=500&order=volume&ascending=false",
-            timeout=12
-        )
-        r.raise_for_status()
-        raw = r.json()
-    except Exception as e:
-        log(f"⚠️  Polymarket unavailable: {e}")
-        return []
+    # Paginate through ALL active markets — not just top 500
+    raw     = []
+    offset  = 0
+    limit   = 500
+    while True:
+        try:
+            r = requests.get(
+                f"https://gamma-api.polymarket.com/markets"
+                f"?active=true&closed=false&limit={limit}&offset={offset}"
+                f"&order=volume&ascending=false",
+                timeout=12
+            )
+            r.raise_for_status()
+            page = r.json()
+            if not page:
+                break
+            raw += page
+            if len(page) < limit:
+                break  # last page
+            offset += limit
+            log(f"   📄 Fetched {len(raw)} markets so far...")
+        except Exception as e:
+            log(f"⚠️  Polymarket fetch error at offset {offset}: {e}")
+            break
 
     now     = datetime.now(timezone.utc)
     markets = []
