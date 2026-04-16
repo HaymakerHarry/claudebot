@@ -1,5 +1,5 @@
 {
-  "bankroll": 857.29,
+  "bankroll": 850.05,
   "trades": [
     {
       "id": "NB1776304868",
@@ -602,10 +602,13 @@
       "closes": "2026-04-16T16:00:00+00:00",
       "volume": 3616.6922090000035,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T02:01:08.863753+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-16T19:00:17.769379+00:00",
+      "realized_pnl": -4.52
     },
     {
       "id": "NB1776304868",
@@ -668,10 +671,13 @@
       "closes": "2026-04-16T12:00:00+00:00",
       "volume": 5223.793426999999,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T04:45:43.894184+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-16T19:00:18.147302+00:00",
+      "realized_pnl": -2.28
     },
     {
       "id": "NB1776314743",
@@ -713,10 +719,13 @@
       "closes": "2026-04-16T12:00:00+00:00",
       "volume": 4502.066587000002,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T04:45:43.894220+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-16T19:00:18.222874+00:00",
+      "realized_pnl": 1.21
     },
     {
       "id": "NB1776314743",
@@ -887,10 +896,13 @@
       "closes": "2026-04-16T12:00:00+00:00",
       "volume": 5008.552942999999,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T06:29:44.150262+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-16T19:00:18.843595+00:00",
+      "realized_pnl": -3.33
     },
     {
       "id": "NB1776320984",
@@ -1338,11 +1350,95 @@
       "placed_at": "2026-04-16T17:04:50.712362+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776366031",
+      "market_id": "1921802",
+      "market_slug": "will-trump-agree-to-iranian-enrichment-of-uranium-in-april",
+      "market": "Will Trump agree to Iranian enrichment of uranium in April?",
+      "position": "NO",
+      "entry_no_price": 60,
+      "entry_yes_price": 40,
+      "stake": 2.15,
+      "payout_if_wins": 3.58,
+      "profit_if_wins": 1.43,
+      "category": "politics",
+      "closes_in_days": 13.21,
+      "closes": "2026-04-30T00:00:00+00:00",
+      "volume": 696557.4182250012,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T19:00:31.270977+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776366031",
+      "market_id": "1731344",
+      "market_slug": "iran-agrees-to-surrender-enriched-uranium-stockpile-by-april-30-2026",
+      "market": "Iran agrees to surrender enriched uranium stockpile by April 30, 2026?",
+      "position": "NO",
+      "entry_no_price": 61,
+      "entry_yes_price": 39,
+      "stake": 2.15,
+      "payout_if_wins": 3.52,
+      "profit_if_wins": 1.37,
+      "category": "economics",
+      "closes_in_days": 13.21,
+      "closes": "2026-04-30T00:00:00+00:00",
+      "volume": 626080.7315090001,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T19:00:31.271012+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776366031",
+      "market_id": "1287656",
+      "market_slug": "will-south-korea-gdp-growth-in-q1-2026-be-at-least-2pt5",
+      "market": "Will South Korea GDP growth in Q1 2026 be at least 2.5%?",
+      "position": "NO",
+      "entry_no_price": 46,
+      "entry_yes_price": 54,
+      "stake": 4.28,
+      "payout_if_wins": 9.3,
+      "profit_if_wins": 5.02,
+      "category": "economics",
+      "closes_in_days": 6.21,
+      "closes": "2026-04-23T00:00:00+00:00",
+      "volume": 6781.022674999999,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T19:00:31.271036+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776366031",
+      "market_id": "1679745",
+      "market_slug": "rutopft-asm-lyo-2026-04-18-lyo",
+      "market": "Will Lyon Rugby win?",
+      "position": "NO",
+      "entry_no_price": 62,
+      "entry_yes_price": 38,
+      "stake": 2.13,
+      "payout_if_wins": 3.44,
+      "profit_if_wins": 1.31,
+      "category": "other",
+      "closes_in_days": 8.83,
+      "closes": "2026-04-25T15:00:00+00:00",
+      "volume": 3677.847618000001,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T19:00:31.271055+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
-  "daily_loss": 0.0,
+  "daily_loss": 10.13,
   "daily_reset": "2026-04-16",
-  "scan_count": 9,
+  "scan_count": 10,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-16T15:19:37.061797+00:00"
 }
