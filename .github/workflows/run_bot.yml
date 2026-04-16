@@ -1,12 +1,12 @@
-name: ClaudeBot Paper Trader
+name: ClaudeBot + NoBot Paper Traders
 
 on:
   schedule:
-    - cron: '0 */3 * * *'
+    - cron: '0 */1 * * *'   # every hour — drives NoBot
   workflow_dispatch:
 
 jobs:
-  run-bot:
+  run-bots:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -23,18 +23,33 @@ jobs:
       - name: Install dependencies
         run: pip install anthropic requests ddgs feedparser
 
-      - name: Run bot (single scan)
+      - name: Run NoBot (every hour)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
           TELEGRAM_PERSONAL_ID: ${{ secrets.TELEGRAM_PERSONAL_ID }}
-        run: python claudebot.py --single-scan
+        run: python nobot.py --single-scan
 
-      - name: Commit updated log back to repo
+      - name: Run ClaudeBot (every 3rd hour only)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+          TELEGRAM_PERSONAL_ID: ${{ secrets.TELEGRAM_PERSONAL_ID }}
+        run: |
+          HOUR=$(date -u +%-H)
+          if (( HOUR % 3 == 0 )); then
+            echo "Hour $HOUR — running ClaudeBot"
+            python claudebot.py --single-scan
+          else
+            echo "Hour $HOUR — skipping ClaudeBot (runs every 3h)"
+          fi
+
+      - name: Commit updated logs back to repo
         run: |
           git config user.name "claudebot"
           git config user.email "claudebot@users.noreply.github.com"
-          git add claudebot_log.json
-          git diff --staged --quiet || git commit -m "bot: update trade log [$(date '+%Y-%m-%d %H:%M')]"
+          git add claudebot_log.json nobot_log.json
+          git diff --staged --quiet || git commit -m "bot: update logs [$(date '+%Y-%m-%d %H:%M')]"
           git push
