@@ -284,8 +284,7 @@ def telegram_trade_resolved(trade, state):
         f"{emoji} <b>TRADE RESOLVED — {result}</b>\n"
         f"{'─' * 30}\n"
         f"<b>{trade['market']}</b>\n"
-        f"Position: <b>{trade['position']} @ {trade['entry_price']}¢</b>\n\n"
-        f"💰 P&L: <b>{pnl_str}</b>"
+        f"Position: <b>{trade['position']} @ {trade['entry_price']}¢</b>"
     )
     send_telegram(public_msg, TELEGRAM_CHANNEL_ID)
 
