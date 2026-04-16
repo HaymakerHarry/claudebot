@@ -1,5 +1,5 @@
 {
-  "bankroll": 877.53,
+  "bankroll": 871.29,
   "trades": [
     {
       "id": "NB1776304868",
@@ -893,10 +893,13 @@
       "closes": "2026-04-16T12:00:00+00:00",
       "volume": 3603.2507889999983,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T06:29:44.150282+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-16T08:23:24.331643+00:00",
+      "realized_pnl": 1.42
     },
     {
       "id": "NB1776320984",
@@ -939,11 +942,74 @@
       "placed_at": "2026-04-16T06:29:44.150316+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776327813",
+      "market_id": "1985994",
+      "market_slug": "highest-temperature-in-tel-aviv-on-april-16-2026-37corhigher",
+      "market": "Will the highest temperature in Tel Aviv be 37\u00b0C or higher on April 16?",
+      "position": "NO",
+      "entry_no_price": 58,
+      "entry_yes_price": 42,
+      "stake": 3.3,
+      "payout_if_wins": 5.69,
+      "profit_if_wins": 2.39,
+      "category": "weather",
+      "closes_in_days": 0.15,
+      "closes": "2026-04-16T12:00:00+00:00",
+      "volume": 6516.874573,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T08:23:33.453773+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776327813",
+      "market_id": "1696384",
+      "market_slug": "will-bitcoin-outperform-nvidia-nvda-in-april-2026",
+      "market": "Will Bitcoin outperform NVIDIA (NVDA) in April 2026?",
+      "position": "NO",
+      "entry_no_price": 48,
+      "entry_yes_price": 52,
+      "stake": 4.39,
+      "payout_if_wins": 9.15,
+      "profit_if_wins": 4.76,
+      "category": "crypto",
+      "closes_in_days": 13.65,
+      "closes": "2026-04-30T00:00:00+00:00",
+      "volume": 5066.242082,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T08:23:33.453809+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776327813",
+      "market_id": "1985881",
+      "market_slug": "highest-temperature-in-seattle-on-april-16-2026-54-55f",
+      "market": "Will the highest temperature in Seattle be between 54-55\u00b0F on April 16?",
+      "position": "NO",
+      "entry_no_price": 60,
+      "entry_yes_price": 40,
+      "stake": 2.18,
+      "payout_if_wins": 3.63,
+      "profit_if_wins": 1.45,
+      "category": "weather",
+      "closes_in_days": 0.15,
+      "closes": "2026-04-16T12:00:00+00:00",
+      "volume": 4919.794470000004,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T08:23:33.453853+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 0.0,
   "daily_reset": "2026-04-16",
-  "scan_count": 3,
+  "scan_count": 4,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-16T02:00:58.513821+00:00"
 }
