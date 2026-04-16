@@ -67,7 +67,7 @@ STAKE_TIERS = [
 ]
 
 # Min market volume — avoid thin books
-MIN_VOLUME = 5000
+MIN_VOLUME = 1000
 
 # Max hold days — close out even if exit not triggered
 MAX_HOLD_DAYS = 30
@@ -435,7 +435,7 @@ def fetch_markets():
     try:
         r = requests.get(
             "https://gamma-api.polymarket.com/markets"
-            "?active=true&closed=false&limit=200&order=volume&ascending=false",
+            "?active=true&closed=false&limit=500&order=volume&ascending=false",
             timeout=12
         )
         r.raise_for_status()
