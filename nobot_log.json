@@ -1,5 +1,5 @@
 {
-  "bankroll": 827.98,
+  "bankroll": 838.02,
   "trades": [
     {
       "id": "NB1776304868",
@@ -428,10 +428,13 @@
       "closes": "2026-04-16T12:00:00+00:00",
       "volume": 4583.344459999999,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T02:01:08.863652+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-16T21:35:23.460588+00:00",
+      "realized_pnl": 4.77
     },
     {
       "id": "NB1776304868",
@@ -944,10 +947,13 @@
       "closes": "2026-04-16T12:00:00+00:00",
       "volume": 3449.3815099999983,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T06:29:44.150299+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-16T21:35:24.630085+00:00",
+      "realized_pnl": 1.21
     },
     {
       "id": "NB1776320984",
@@ -1136,10 +1142,13 @@
       "closes": "2026-04-19T00:00:00+00:00",
       "volume": 8668.814499999999,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T11:53:23.770595+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-16T21:35:25.335025+00:00",
+      "realized_pnl": 2.38
     },
     {
       "id": "NB1776340403",
@@ -1602,11 +1611,74 @@
       "placed_at": "2026-04-16T20:02:00.216046+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776375337",
+      "market_id": "1988535",
+      "market_slug": "highest-temperature-in-shanghai-on-april-17-2026-21c",
+      "market": "Will the highest temperature in Shanghai be 21\u00b0C on April 17?",
+      "position": "NO",
+      "entry_no_price": 60,
+      "entry_yes_price": 40,
+      "stake": 2.12,
+      "payout_if_wins": 3.53,
+      "profit_if_wins": 1.41,
+      "category": "weather",
+      "closes_in_days": 0.6,
+      "closes": "2026-04-17T12:00:00+00:00",
+      "volume": 5103.344675000005,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T21:35:37.348794+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776375337",
+      "market_id": "1988367",
+      "market_slug": "highest-temperature-in-paris-on-april-17-2026-21c",
+      "market": "Will the highest temperature in Paris be 21\u00b0C on April 17?",
+      "position": "NO",
+      "entry_no_price": 62,
+      "entry_yes_price": 38,
+      "stake": 2.11,
+      "payout_if_wins": 3.4,
+      "profit_if_wins": 1.29,
+      "category": "weather",
+      "closes_in_days": 0.6,
+      "closes": "2026-04-17T12:00:00+00:00",
+      "volume": 4471.244064000002,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T21:35:37.348827+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776375337",
+      "market_id": "1988468",
+      "market_slug": "highest-temperature-in-wellington-on-april-17-2026-18c",
+      "market": "Will the highest temperature in Wellington be 18\u00b0C on April 17?",
+      "position": "NO",
+      "entry_no_price": 50,
+      "entry_yes_price": 50,
+      "stake": 4.21,
+      "payout_if_wins": 8.42,
+      "profit_if_wins": 4.21,
+      "category": "weather",
+      "closes_in_days": 0.6,
+      "closes": "2026-04-17T12:00:00+00:00",
+      "volume": 3642.103432,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T21:35:37.348846+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 10.13,
   "daily_reset": "2026-04-16",
-  "scan_count": 11,
+  "scan_count": 12,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-16T15:19:37.061797+00:00"
 }
