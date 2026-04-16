@@ -1,5 +1,5 @@
 {
-  "bankroll": 844.5,
+  "bankroll": 848.24,
   "trades": [
     {
       "id": "NB1776304868",
@@ -767,10 +767,13 @@
       "closes": "2026-04-16T12:00:00+00:00",
       "volume": 3732.8118870000008,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T04:45:43.894249+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-16T23:33:10.293883+00:00",
+      "realized_pnl": 2.5
     },
     {
       "id": "NB1776314743",
@@ -1103,10 +1106,13 @@
       "closes": "2026-04-19T00:00:00+00:00",
       "volume": 4296.659564,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T10:08:54.456275+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-16T23:33:11.213333+00:00",
+      "realized_pnl": -3.24
     },
     {
       "id": "NB1776334134",
@@ -1701,11 +1707,32 @@
       "placed_at": "2026-04-16T22:32:15.856452+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776382401",
+      "market_id": "1999974",
+      "market_slug": "bitcoin-above-76k-on-april-23",
+      "market": "Will the price of Bitcoin be above $76,000 on April 23?",
+      "position": "NO",
+      "entry_no_price": 59,
+      "entry_yes_price": 41,
+      "stake": 2.13,
+      "payout_if_wins": 3.61,
+      "profit_if_wins": 1.48,
+      "category": "crypto",
+      "closes_in_days": 6.69,
+      "closes": "2026-04-23T16:00:00+00:00",
+      "volume": 3747.583688999936,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-16T23:33:21.850738+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
-  "daily_loss": 10.13,
+  "daily_loss": 13.37,
   "daily_reset": "2026-04-16",
-  "scan_count": 13,
+  "scan_count": 14,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-16T15:19:37.061797+00:00"
 }
