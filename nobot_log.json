@@ -1,5 +1,5 @@
 {
-  "bankroll": 826.78,
+  "bankroll": 829.85,
   "trades": [
     {
       "id": "NB1776304868",
@@ -1508,10 +1508,13 @@
       "closes": "2026-04-17T16:00:00+00:00",
       "volume": 40495.71333800006,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T20:02:00.215938+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-17T11:43:20.765920+00:00",
+      "realized_pnl": 4.05
     },
     {
       "id": "NB1776369720",
@@ -2133,11 +2136,53 @@
       "placed_at": "2026-04-17T10:06:31.969709+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776426215",
+      "market_id": "1938549",
+      "market_slug": "will-the-total-number-of-tsa-passengers-for-april-13-april-19-be-less-than-16500000",
+      "market": "Will the total number of TSA passengers for April 13 - April 19 be less than 16,500,000?",
+      "position": "NO",
+      "entry_no_price": 60,
+      "entry_yes_price": 40,
+      "stake": 2.09,
+      "payout_if_wins": 3.48,
+      "profit_if_wins": 1.39,
+      "category": "other",
+      "closes_in_days": 1.51,
+      "closes": "2026-04-19T00:00:00+00:00",
+      "volume": 8430.49,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T11:43:35.855196+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776426215",
+      "market_id": "1981835",
+      "market_slug": "bitcoin-above-76k-on-april-21",
+      "market": "Will the price of Bitcoin be above $76,000 on April 21?",
+      "position": "NO",
+      "entry_no_price": 56,
+      "entry_yes_price": 44,
+      "stake": 3.12,
+      "payout_if_wins": 5.57,
+      "profit_if_wins": 2.45,
+      "category": "crypto",
+      "closes_in_days": 4.18,
+      "closes": "2026-04-21T16:00:00+00:00",
+      "volume": 4775.934748000002,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T11:43:35.855261+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 9.08,
   "daily_reset": "2026-04-17",
-  "scan_count": 21,
+  "scan_count": 22,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-17T04:38:08.777585+00:00"
 }
