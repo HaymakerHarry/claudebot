@@ -1,5 +1,5 @@
 {
-  "bankroll": 788.48,
+  "bankroll": 783.56,
   "trades": [
     {
       "id": "NB1776304868",
@@ -2757,11 +2757,53 @@
       "placed_at": "2026-04-17T21:34:27.216805+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776465017",
+      "market_id": "1938549",
+      "market_slug": "will-the-total-number-of-tsa-passengers-for-april-13-april-19-be-less-than-16500000",
+      "market": "Will the total number of TSA passengers for April 13 - April 19 be less than 16,500,000?",
+      "position": "NO",
+      "entry_no_price": 53,
+      "entry_yes_price": 47,
+      "stake": 2.96,
+      "payout_if_wins": 5.58,
+      "profit_if_wins": 2.62,
+      "category": "other",
+      "closes_in_days": 1.06,
+      "closes": "2026-04-19T00:00:00+00:00",
+      "volume": 8430.49,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T22:30:17.047063+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776465017",
+      "market_id": "1996307",
+      "market_slug": "highest-temperature-in-paris-on-april-18-2026-20c",
+      "market": "Will the highest temperature in Paris be 20\u00b0C on April 18?",
+      "position": "NO",
+      "entry_no_price": 62,
+      "entry_yes_price": 38,
+      "stake": 1.96,
+      "payout_if_wins": 3.16,
+      "profit_if_wins": 1.2,
+      "category": "weather",
+      "closes_in_days": 0.56,
+      "closes": "2026-04-18T12:00:00+00:00",
+      "volume": 3807.1604230000034,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T22:30:17.047102+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 38.81,
   "daily_reset": "2026-04-17",
-  "scan_count": 31,
+  "scan_count": 32,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-17T16:44:31.051960+00:00"
 }
