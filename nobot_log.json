@@ -1,5 +1,5 @@
 {
-  "bankroll": 795.43,
+  "bankroll": 791.45,
   "trades": [
     {
       "id": "NB1776304868",
@@ -2715,11 +2715,32 @@
       "placed_at": "2026-04-17T19:52:59.988604+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776458194",
+      "market_id": "1959501",
+      "market_slug": "will-the-price-of-bitcoin-be-between-76000-78000-on-april-19",
+      "market": "Will the price of Bitcoin be between $76,000 and $78,000 on April 19?",
+      "position": "NO",
+      "entry_no_price": 46,
+      "entry_yes_price": 54,
+      "stake": 3.98,
+      "payout_if_wins": 8.65,
+      "profit_if_wins": 4.67,
+      "category": "crypto",
+      "closes_in_days": 1.81,
+      "closes": "2026-04-19T16:00:00+00:00",
+      "volume": 7453.2006710000005,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T20:36:34.830804+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 38.81,
   "daily_reset": "2026-04-17",
-  "scan_count": 29,
+  "scan_count": 30,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-17T16:44:31.051960+00:00"
 }
