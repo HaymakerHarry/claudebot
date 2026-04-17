@@ -1,5 +1,5 @@
 {
-  "bankroll": 848.24,
+  "bankroll": 842.95,
   "trades": [
     {
       "id": "NB1776304868",
@@ -452,10 +452,13 @@
       "closes": "2026-04-19T00:00:00+00:00",
       "volume": 4578.862666000001,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T02:01:08.863666+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-17T01:45:42.559449+00:00",
+      "realized_pnl": -4.64
     },
     {
       "id": "NB1776304868",
@@ -584,10 +587,13 @@
       "closes": "2026-04-16T12:00:00+00:00",
       "volume": 3657.6549230000005,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T02:01:08.863741+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-17T01:45:43.226980+00:00",
+      "realized_pnl": -2.26
     },
     {
       "id": "NB1776304868",
@@ -1728,11 +1734,53 @@
       "placed_at": "2026-04-16T23:33:21.850738+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776390362",
+      "market_id": "1988405",
+      "market_slug": "highest-temperature-in-seoul-on-april-17-2026-18corhigher",
+      "market": "Will the highest temperature in Seoul be 18\u00b0C or higher on April 17?",
+      "position": "NO",
+      "entry_no_price": 54,
+      "entry_yes_price": 46,
+      "stake": 3.18,
+      "payout_if_wins": 5.89,
+      "profit_if_wins": 2.71,
+      "category": "weather",
+      "closes_in_days": 0.43,
+      "closes": "2026-04-17T12:00:00+00:00",
+      "volume": 43312.46908700011,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T01:46:02.996097+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776390362",
+      "market_id": "1706194",
+      "market_slug": "will-usd-fall-to-1pt5m-iranian-rials-by-april-30",
+      "market": "Will USD fall to 1.5M Iranian rials by April 30?",
+      "position": "NO",
+      "entry_no_price": 59,
+      "entry_yes_price": 41,
+      "stake": 2.11,
+      "payout_if_wins": 3.58,
+      "profit_if_wins": 1.47,
+      "category": "other",
+      "closes_in_days": 12.93,
+      "closes": "2026-04-30T00:00:00+00:00",
+      "volume": 9777.581085000002,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T01:46:02.996156+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
-  "daily_loss": 13.37,
-  "daily_reset": "2026-04-16",
-  "scan_count": 14,
+  "daily_loss": 6.9,
+  "daily_reset": "2026-04-17",
+  "scan_count": 15,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-16T15:19:37.061797+00:00"
 }
