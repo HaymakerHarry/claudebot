@@ -1,5 +1,5 @@
 {
-  "bankroll": 801.43,
+  "bankroll": 795.43,
   "trades": [
     {
       "id": "NB1776304868",
@@ -1232,10 +1232,13 @@
       "closes": "2026-04-17T16:00:00+00:00",
       "volume": 347490.4281280003,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T15:19:50.216740+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-17T19:52:41.628570+00:00",
+      "realized_pnl": -4.4
     },
     {
       "id": "NB1776352790",
@@ -1319,10 +1322,13 @@
       "closes": "2026-04-17T12:00:00+00:00",
       "volume": 4097.300292,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T15:19:50.216839+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-17T19:52:41.982190+00:00",
+      "realized_pnl": -2.16
     },
     {
       "id": "NB1776352790",
@@ -1361,10 +1367,13 @@
       "closes": "2026-04-17T16:00:00+00:00",
       "volume": 91626.49326499998,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T17:04:50.712324+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-17T19:52:42.141097+00:00",
+      "realized_pnl": -4.32
     },
     {
       "id": "NB1776359090",
@@ -1643,10 +1652,13 @@
       "closes": "2026-04-17T16:00:00+00:00",
       "volume": 3848.681942999999,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T20:02:00.216046+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-17T19:52:43.209883+00:00",
+      "realized_pnl": -2.08
     },
     {
       "id": "NB1776375337",
@@ -1868,10 +1880,13 @@
       "closes": "2026-04-17T12:00:00+00:00",
       "volume": 8213.931762999997,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-17T04:38:29.474280+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-17T19:52:43.800974+00:00",
+      "realized_pnl": -4.24
     },
     {
       "id": "NB1776400709",
@@ -1937,10 +1952,13 @@
       "closes": "2026-04-17T12:00:00+00:00",
       "volume": 3853.3108699999993,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-17T04:38:29.474369+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-17T19:52:43.894843+00:00",
+      "realized_pnl": -4.18
     },
     {
       "id": "NB1776400709",
@@ -2111,10 +2129,13 @@
       "closes": "2026-04-17T16:00:00+00:00",
       "volume": 63889.95973699992,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-17T10:06:31.969640+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-17T19:52:44.570403+00:00",
+      "realized_pnl": -2.09
     },
     {
       "id": "NB1776420391",
@@ -2652,11 +2673,53 @@
       "placed_at": "2026-04-17T18:45:06.243157+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776455579",
+      "market_id": "1930937",
+      "market_slug": "will-michael-opening-weekend-box-office-be-greater-than-80m",
+      "market": "Will \"Michael\" Opening Weekend Box Office be greater than 80m?",
+      "position": "NO",
+      "entry_no_price": 52,
+      "entry_yes_price": 48,
+      "stake": 4.01,
+      "payout_if_wins": 7.71,
+      "profit_if_wins": 3.7,
+      "category": "other",
+      "closes_in_days": 9.67,
+      "closes": "2026-04-27T12:00:00+00:00",
+      "volume": 7207.668843,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T19:52:59.988563+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776455579",
+      "market_id": "1993388",
+      "market_slug": "will-the-super-mario-galaxy-movie-3rd-weekend-box-office-be-less-than-31m",
+      "market": "Will \"The Super Mario Galaxy Movie\" 3rd Weekend Box Office be less than 31m?",
+      "position": "NO",
+      "entry_no_price": 62,
+      "entry_yes_price": 38,
+      "stake": 1.99,
+      "payout_if_wins": 3.21,
+      "profit_if_wins": 1.22,
+      "category": "other",
+      "closes_in_days": 2.17,
+      "closes": "2026-04-20T00:00:00+00:00",
+      "volume": 4350.506700999999,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T19:52:59.988604+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
-  "daily_loss": 15.34,
+  "daily_loss": 38.81,
   "daily_reset": "2026-04-17",
-  "scan_count": 28,
+  "scan_count": 29,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-17T16:44:31.051960+00:00"
 }
