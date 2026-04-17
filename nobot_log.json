@@ -1,5 +1,5 @@
 {
-  "bankroll": 800.34,
+  "bankroll": 799.19,
   "trades": [
     {
       "id": "NB1776304868",
@@ -2066,10 +2066,13 @@
       "closes": "2026-04-17T12:00:00+00:00",
       "volume": 4662.777597000002,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-17T08:22:39.081250+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-17T17:41:31.086350+00:00",
+      "realized_pnl": 1.4
     },
     {
       "id": "NB1776414159",
@@ -2171,10 +2174,13 @@
       "closes": "2026-04-19T00:00:00+00:00",
       "volume": 8430.49,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-17T11:43:35.855196+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-17T17:41:31.876117+00:00",
+      "realized_pnl": 1.32
     },
     {
       "id": "NB1776426215",
@@ -2318,10 +2324,13 @@
       "closes": "2026-04-17T20:00:00+00:00",
       "volume": 4265.5911860000015,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-17T14:20:35.962575+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-17T17:41:33.357514+00:00",
+      "realized_pnl": -2.05
     },
     {
       "id": "NB1776435635",
@@ -2553,11 +2562,53 @@
       "placed_at": "2026-04-17T16:44:48.595660+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776447707",
+      "market_id": "1998677",
+      "market_slug": "nvda-close-above-200-on-april-17-2026",
+      "market": "Will NVIDIA (NVDA) close above $200 on April 17?",
+      "position": "NO",
+      "entry_no_price": 51,
+      "entry_yes_price": 49,
+      "stake": 4.04,
+      "payout_if_wins": 7.92,
+      "profit_if_wins": 3.88,
+      "category": "other",
+      "closes_in_days": 0.1,
+      "closes": "2026-04-17T20:00:00+00:00",
+      "volume": 5501.798422000003,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T17:41:47.648372+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776447707",
+      "market_id": "1542554",
+      "market_slug": "will-googl-reach-355-in-april",
+      "market": "Will Google reach $355 in April?",
+      "position": "NO",
+      "entry_no_price": 48,
+      "entry_yes_price": 52,
+      "stake": 4.02,
+      "payout_if_wins": 8.37,
+      "profit_if_wins": 4.35,
+      "category": "other",
+      "closes_in_days": 13.43,
+      "closes": "2026-05-01T03:59:59.999000+00:00",
+      "volume": 3860.450666,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-17T17:41:47.648406+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
-  "daily_loss": 13.29,
+  "daily_loss": 15.34,
   "daily_reset": "2026-04-17",
-  "scan_count": 26,
+  "scan_count": 27,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-17T16:44:31.051960+00:00"
 }
