@@ -685,10 +685,16 @@ def open_positions_for_tier(tier_num, state):
             if t["status"] == "open" and t.get("tier", 1) == tier_num]
 
 
-def category_slots_available(category, state):
+def category_slots_available(category, state, tier_num=None):
     open_trades = [t for t in state["trades"] if t["status"] == "open"]
-    cat_count   = sum(
-        1 for t in open_trades
+    # T2 does not block T1 — only count same-tier open positions for the cap
+    # T3 is independent too — each tier manages its own category cap
+    if tier_num is not None:
+        same_tier = [t for t in open_trades if t.get("tier", 1) == tier_num]
+    else:
+        same_tier = open_trades
+    cat_count = sum(
+        1 for t in same_tier
         if (t.get("category") or get_category(t.get("market", ""))) == category
     )
     return cat_count < MAX_PER_CATEGORY
@@ -1020,7 +1026,13 @@ def opus_analyze_short_medium(markets, research, state, tier_num):
         for t in open_trades:
             c = t.get("category") or get_category(t.get("market", ""))
             cat_counts[c] = cat_counts.get(c, 0) + 1
-        open_ctx += f"\nCATEGORY COUNTS: {cat_counts} | MAX: {MAX_PER_CATEGORY}"
+        t1_cat_counts = {}
+        for t in open_trades:
+            if t.get("tier", 1) == tier_num:
+                c = t.get("category") or get_category(t.get("market", ""))
+                t1_cat_counts[c] = t1_cat_counts.get(c, 0) + 1
+        open_ctx += f"\nALL OPEN CATEGORY COUNTS: {cat_counts}"
+        open_ctx += f"\nT{tier_num} CATEGORY COUNTS (cap applies here): {t1_cat_counts} | MAX: {MAX_PER_CATEGORY}"
 
     mkt_sections = []
     for m in markets:
@@ -1196,8 +1208,8 @@ def _validate_recs(recs, markets, state, tier_num):
         if cat in BLOCKED_CATEGORIES:
             log(f"  ⛔ '{cat}' blocked — {r.get('market','')[:50]}")
             continue
-        if not category_slots_available(cat, state):
-            log(f"  ⏭  '{cat}' full — {r.get('market','')[:50]}")
+        if not category_slots_available(cat, state, tier_num):
+            log(f"  ⏭  '{cat}' full (T{tier_num}) — {r.get('market','')[:50]}")
             continue
         valid.append(r)
 
@@ -1239,8 +1251,8 @@ def place_paper_trade(rec, markets, state, tier_num, news_triggered=False):
     if cat in BLOCKED_CATEGORIES:
         log(f"  ⛔ '{cat}' blocked")
         return state
-    if not category_slots_available(cat, state):
-        log(f"  ⏭  '{cat}' full")
+    if not category_slots_available(cat, state, tier_num):
+        log(f"  ⏭  '{cat}' full (T{tier_num})")
         return state
 
     mkt = next((m for m in markets if m["id"] == rec["market_id"]), None)
