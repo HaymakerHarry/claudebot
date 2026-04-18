@@ -1,5 +1,5 @@
 {
-  "bankroll": 768.33,
+  "bankroll": 765.45,
   "trades": [
     {
       "id": "NB1776304868",
@@ -3924,11 +3924,32 @@
       "placed_at": "2026-04-18T21:26:06.786675+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776551104",
+      "market_id": "1993390",
+      "market_slug": "will-the-super-mario-galaxy-movie-3rd-weekend-box-office-be-between-34m-and-37m",
+      "market": "Will \"The Super Mario Galaxy Movie\" 3rd Weekend Box Office be between 34m and 37m?",
+      "position": "NO",
+      "entry_no_price": 57,
+      "entry_yes_price": 43,
+      "stake": 2.88,
+      "payout_if_wins": 5.05,
+      "profit_if_wins": 2.17,
+      "category": "other",
+      "closes_in_days": 1.07,
+      "closes": "2026-04-20T00:00:00+00:00",
+      "volume": 35189.066029999994,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-18T22:25:04.292066+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 43.54,
   "daily_reset": "2026-04-18",
-  "scan_count": 52,
+  "scan_count": 53,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-18T18:34:51.559911+00:00"
 }
