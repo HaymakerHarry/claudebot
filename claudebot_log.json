@@ -736,10 +736,13 @@
       "bear_case": "Event cancellation, Trump no-show, or unexpectedly non-religious speech focus; resolution criteria might require exact standalone word rather than variants",
       "kelly_tier": "half-Kelly (10.0%)",
       "news_triggered": false,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-15T13:58:16.807231+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": false,
+      "resolved_at": "2026-04-18T06:08:09.001155+00:00",
+      "realized_pnl": -184.89
     },
     {
       "id": "T1776461747",
@@ -774,9 +777,9 @@
       "model": "claude-opus-4-6"
     }
   ],
-  "daily_loss": 0.0,
+  "daily_loss": 184.89,
   "daily_reset": "2026-04-18",
-  "scan_count": 115,
+  "scan_count": 116,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-12",
   "last_tier2_scan": "2026-04-18",
