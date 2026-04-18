@@ -1,5 +1,5 @@
 {
-  "bankroll": 771.11,
+  "bankroll": 767.26,
   "trades": [
     {
       "id": "NB1776304868",
@@ -323,10 +323,13 @@
       "closes": "2026-04-18T16:00:00+00:00",
       "volume": 5347.641302999999,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T02:01:08.863590+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-18T19:35:13.668057+00:00",
+      "realized_pnl": -2.37
     },
     {
       "id": "NB1776304868",
@@ -3269,10 +3272,13 @@
       "closes": "2026-04-18T12:00:00+00:00",
       "volume": 3673.4246350000003,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-18T04:25:25.581638+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-18T19:35:19.509351+00:00",
+      "realized_pnl": -1.88
     },
     {
       "id": "NB1776498889",
@@ -3807,11 +3813,53 @@
       "placed_at": "2026-04-18T18:35:17.987636+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776540934",
+      "market_id": "1542886",
+      "market_slug": "will-open-dip-to-3-50-in-april",
+      "market": "Will Opendoor dip to $3.50 in April?",
+      "position": "NO",
+      "entry_no_price": 61,
+      "entry_yes_price": 39,
+      "stake": 1.93,
+      "payout_if_wins": 3.16,
+      "profit_if_wins": 1.23,
+      "category": "other",
+      "closes_in_days": 12.35,
+      "closes": "2026-05-01T03:59:59.999000+00:00",
+      "volume": 6433.681702999999,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-18T19:35:34.539920+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776540934",
+      "market_id": "2003640",
+      "market_slug": "highest-temperature-in-london-on-april-19-2026-15c",
+      "market": "Will the highest temperature in London be 15\u00b0C on April 19?",
+      "position": "NO",
+      "entry_no_price": 60,
+      "entry_yes_price": 40,
+      "stake": 1.92,
+      "payout_if_wins": 3.2,
+      "profit_if_wins": 1.28,
+      "category": "weather",
+      "closes_in_days": 0.68,
+      "closes": "2026-04-19T12:00:00+00:00",
+      "volume": 3768.961879999998,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-18T19:35:34.539963+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
-  "daily_loss": 39.29,
+  "daily_loss": 43.54,
   "daily_reset": "2026-04-18",
-  "scan_count": 49,
+  "scan_count": 50,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-18T18:34:51.559911+00:00"
 }
