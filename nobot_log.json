@@ -1,5 +1,5 @@
 {
-  "bankroll": 764.38,
+  "bankroll": 768.33,
   "trades": [
     {
       "id": "NB1776304868",
@@ -2477,10 +2477,13 @@
       "closes": "2026-04-20T16:00:00+00:00",
       "volume": 6184.562336,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-17T15:51:43.806976+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-18T21:25:49.397505+00:00",
+      "realized_pnl": 1.77
     },
     {
       "id": "NB1776441103",
@@ -2771,10 +2774,13 @@
       "closes": "2026-04-20T00:00:00+00:00",
       "volume": 4350.506700999999,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-17T19:52:59.988604+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-18T21:25:50.316429+00:00",
+      "realized_pnl": 0.99
     },
     {
       "id": "NB1776458194",
@@ -3876,11 +3882,53 @@
       "placed_at": "2026-04-18T20:27:18.892131+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776547566",
+      "market_id": "1823776",
+      "market_slug": "will-bitcoin-reach-80k-in-april-2026",
+      "market": "Will Bitcoin reach $80,000 in April?",
+      "position": "NO",
+      "entry_no_price": 62,
+      "entry_yes_price": 38,
+      "stake": 1.93,
+      "payout_if_wins": 3.11,
+      "profit_if_wins": 1.18,
+      "category": "crypto",
+      "closes_in_days": 12.27,
+      "closes": "2026-05-01T04:00:00+00:00",
+      "volume": 3525790.5988659025,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-18T21:26:06.786638+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776547566",
+      "market_id": "1693164",
+      "market_slug": "will-russia-enter-novooleksandrivka-by-april-30-2026",
+      "market": "Will Russia enter Novooleksandrivka by April 30, 2026?",
+      "position": "NO",
+      "entry_no_price": 61,
+      "entry_yes_price": 39,
+      "stake": 1.93,
+      "payout_if_wins": 3.16,
+      "profit_if_wins": 1.23,
+      "category": "other",
+      "closes_in_days": 11.11,
+      "closes": "2026-04-30T00:00:00+00:00",
+      "volume": 41122.98309400004,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-18T21:26:06.786675+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 43.54,
   "daily_reset": "2026-04-18",
-  "scan_count": 51,
+  "scan_count": 52,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-18T18:34:51.559911+00:00"
 }
