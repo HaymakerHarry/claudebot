@@ -56,6 +56,9 @@ DAILY_LOSS_LIMIT   = 150.00
 SCAN_INTERVAL_MINS = 180
 LOG_FILE           = "claudebot_log.json"
 
+REASSESS_INTERVAL_DAYS = 3   # reassess open T2/T3 trades every N days
+MIN_DAYS_REMAINING     = 5   # skip reassessment if trade closes within N days
+
 BLOCKED_CATEGORIES = {"sports"}
 
 TIERS = {
@@ -513,6 +516,7 @@ def load_state():
         "last_daily_summary": "",
         "last_tier2_scan":    "",
         "last_tier3_scan":    "",
+        "last_reassessment":  "",
     }
 
 
@@ -1431,6 +1435,210 @@ def run_tier(tier_num, state, priority_markets=None):
 
 
 # ─────────────────────────────────────────────────────────
+#  TRADE REASSESSMENT — Two-Strike Brain (T2 + T3)
+# ─────────────────────────────────────────────────────────
+
+def should_run_reassessment(state):
+    """True if REASSESS_INTERVAL_DAYS have passed since last reassessment."""
+    now  = datetime.now(timezone.utc)
+    last = state.get("last_reassessment", "")
+    if not last:
+        return True
+    try:
+        last_dt = datetime.fromisoformat(last)
+        return (now - last_dt).total_seconds() >= REASSESS_INTERVAL_DAYS * 86400
+    except Exception:
+        return True
+
+
+def telegram_watch_alert(trade, reason, state):
+    """Private Telegram alert when a trade is flagged on first strike."""
+    if not TELEGRAM_PERSONAL_ID:
+        return
+    badge     = tier_badge(trade.get("tier", 2))
+    close_dt  = parse_utc(trade.get("closes", ""))
+    days_left = round(days_until(close_dt), 1) if close_dt else "?"
+    msg = (
+        f"👁 <b>WATCH FLAGGED — Strike 1</b>  {badge} T{trade.get('tier',2)}\n"
+        f"{'─' * 30}\n"
+        f"<b>{trade['market']}</b>\n\n"
+        f"⚠️ <b>Concern:</b> <i>{reason}</i>\n\n"
+        f"📌 {trade['position']} @ {trade['entry_price']}¢  |  Stake: ${trade['stake']:.2f}\n"
+        f"⏰ {days_left}d remaining\n\n"
+        f"🔄 No action yet. Will reassess in {REASSESS_INTERVAL_DAYS} days.\n"
+        f"If concern persists → trade will be closed."
+    )
+    send_telegram(msg, TELEGRAM_PERSONAL_ID)
+
+
+def telegram_reassess_close(trade, reason, strike, state):
+    """Private Telegram alert when reassessment closes a trade."""
+    if not TELEGRAM_PERSONAL_ID:
+        return
+    badge     = tier_badge(trade.get("tier", 2))
+    close_dt  = parse_utc(trade.get("closes", ""))
+    days_left = round(days_until(close_dt), 1) if close_dt else "?"
+    strike_txt = "EMERGENCY" if strike == "emergency" else f"Strike {strike}"
+    msg = (
+        f"🚨 <b>REASSESSMENT CLOSE — {strike_txt}</b>  {badge}\n"
+        f"{'─' * 30}\n"
+        f"<b>{trade['market']}</b>\n\n"
+        f"❌ <b>Thesis broken:</b> <i>{reason}</i>\n\n"
+        f"📌 {trade['position']} @ {trade['entry_price']}¢  |  "
+        f"Stake: ${trade['stake']:.2f}\n"
+        f"⏰ {days_left}d remaining — closing to limit loss\n\n"
+        f"ℹ️ Original thesis:\n"
+        f"<i>{trade.get('research_summary','')[:200]}</i>"
+    )
+    send_telegram(msg, TELEGRAM_PERSONAL_ID)
+
+
+def opus_reassess_trade(trade, state):
+    """
+    Opus reassesses a single open T2/T3 trade with fresh research.
+    Returns: {"verdict": "hold|watch|close|emergency_close", "reason": str}
+
+    Verdicts:
+      hold           — thesis intact, no action
+      watch          — concern flagged (strike 1), check again next cycle
+      close          — thesis weakened, close on strike 2 (or directly)
+      emergency_close — thesis completely invalidated, close immediately
+    """
+    client    = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    close_dt  = parse_utc(trade.get("closes", ""))
+    days_left = round(days_until(close_dt), 1) if close_dt else 99
+
+    # Fresh DDG research
+    query   = f"{trade['market'][:80]} latest news {datetime.now(timezone.utc).strftime('%B %Y')}"
+    results = ddg_search(query, max_results=5)
+
+    results_txt = "\n\n".join(
+        f"[{i+1}] {r.get('title','')}\n{r.get('body','')[:200]}"
+        for i, r in enumerate(results[:5])
+    ) if results else "No search results found."
+
+    # If already on watch, tell Opus — this is the deciding reassessment
+    watch_ctx = ""
+    if trade.get("watch"):
+        watch_ctx = (
+            f"\n⚠️ PREVIOUSLY FLAGGED ON WATCH (since {trade.get('watch_since','?')}):\n"
+            f"Prior concern: {trade.get('watch_reason','?')}\n"
+            f"This is the SECOND assessment. If concern still valid → recommend CLOSE.\n"
+        )
+
+    prompt = (
+        f"Reassess an open prediction market trade. Has the original thesis changed?\n\n"
+        f"TODAY: {datetime.now(timezone.utc).strftime('%A %B %d %Y %H:%M UTC')}\n"
+        f"MARKET: \"{trade['market']}\"\n"
+        f"POSITION: {trade['position']} @ {trade['entry_price']}¢\n"
+        f"CLOSES: {trade.get('closes','?')[:10]} ({days_left:.0f}d remaining)\n"
+        f"CATEGORY: {trade.get('category','?')}\n\n"
+        f"ORIGINAL THESIS:\n{trade.get('research_summary','N/A')}\n\n"
+        f"KEY FACTORS:\n"
+        + "\n".join(f"  - {f}" for f in trade.get("key_factors", []))
+        + f"\n\nBEAR CASE:\n{trade.get('bear_case','N/A')}\n"
+        f"{watch_ctx}\n"
+        f"FRESH RESEARCH:\n{results_txt}\n\n"
+        f"RULES:\n"
+        f"  - Judge on FACTS ON THE GROUND only. Ignore price movement.\n"
+        f"  - Small noise or uncertainty = HOLD\n"
+        f"  - Clear new facts contradicting thesis = WATCH or CLOSE\n"
+        f"  - Thesis completely invalidated = EMERGENCY_CLOSE\n\n"
+        f"VERDICTS:\n"
+        f"  hold           — thesis intact\n"
+        f"  watch          — something concerning, flag for next cycle\n"
+        f"  close          — thesis broken (use after prior WATCH, or if clearly wrong)\n"
+        f"  emergency_close — outcome already determined against us or confirmed impossible\n\n"
+        f"Return ONLY JSON: {{\"verdict\": \"hold\", \"reason\": \"brief explanation\"}}"
+    )
+
+    try:
+        resp = client.messages.create(
+            model=ANALYST_MODEL,
+            max_tokens=300,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw   = resp.content[0].text.strip().replace("```json","").replace("```","").strip()
+        match = re.search(r'\{[\s\S]*\}', raw)
+        data  = json.loads(match.group(0) if match else '{}')
+        verdict = data.get("verdict", "hold").lower().replace(" ", "_")
+        reason  = data.get("reason", "No reason provided.")
+        return {"verdict": verdict, "reason": reason}
+    except Exception as e:
+        log(f"  ⚠️  Reassess error: {e}")
+        return {"verdict": "hold", "reason": f"Error: {e}"}
+
+
+def run_trade_reassessments(state):
+    """
+    Two-strike reassessment brain for open T2 and T3 trades.
+
+    Strike 1 (watch):      Concern flagged → sets watch flag, private Telegram alert, no close
+    Strike 2 (close):      Concern persists on next cycle → closes the trade
+    Emergency close:        Thesis fully invalidated → closes immediately, no second strike needed
+    """
+    open_t2t3 = [
+        t for t in state["trades"]
+        if t["status"] == "open" and t.get("tier", 1) in [2, 3]
+    ]
+
+    if not open_t2t3:
+        log("🔍 Reassessment: no open T2/T3 positions to check")
+        return state
+
+    log(f"🔍 Reassessing {len(open_t2t3)} open T2/T3 position(s)...")
+
+    for trade in open_t2t3:
+        close_dt  = parse_utc(trade.get("closes", ""))
+        days_left = days_until(close_dt) if close_dt else 99
+
+        if days_left < MIN_DAYS_REMAINING:
+            log(f"  ⏭  Skipping ({days_left:.1f}d left — too close to close): {trade['market'][:50]}")
+            continue
+
+        log(f"  🔬 [{TIERS[trade['tier']]['label']}] {trade['market'][:60]}")
+        result  = opus_reassess_trade(trade, state)
+        verdict = result["verdict"]
+        reason  = result["reason"]
+        log(f"     Verdict: {verdict.upper()} — {reason[:90]}")
+
+        if verdict == "hold":
+            if trade.get("watch"):
+                log(f"     ✅ Watch cleared — thesis back on track")
+                trade.pop("watch", None)
+                trade.pop("watch_reason", None)
+                trade.pop("watch_since", None)
+            else:
+                log(f"     ✅ Holding — thesis intact")
+
+        elif verdict == "watch":
+            if trade.get("watch"):
+                # Already flagged last cycle — this is strike 2, close it
+                log(f"     🚨 Strike 2 — concern persists, closing trade")
+                telegram_reassess_close(trade, reason, strike=2, state=state)
+                _settle(trade, False, state)
+            else:
+                # First flag — set watch, send private alert, no action yet
+                log(f"     👁  Strike 1 — flagging for watch, no action yet")
+                trade["watch"]        = True
+                trade["watch_reason"] = reason
+                trade["watch_since"]  = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                telegram_watch_alert(trade, reason, state)
+
+        elif verdict in ("close", "emergency_close"):
+            strike = "emergency" if verdict == "emergency_close" else 2
+            log(f"     🚨 {'Emergency' if strike == 'emergency' else 'Direct'} close — {reason[:60]}")
+            telegram_reassess_close(trade, reason, strike=strike, state=state)
+            _settle(trade, False, state)
+
+        else:
+            log(f"     ⚠️  Unknown verdict '{verdict}' — treating as hold")
+
+    return state
+
+
+
+# ─────────────────────────────────────────────────────────
 #  MAIN
 # ─────────────────────────────────────────────────────────
 
@@ -1469,6 +1677,14 @@ def single_scan():
     # ── Step 1: Resolve ───────────────────────────────────
     log("── Resolve open trades ──────────────────────────────────")
     state = resolve_open_trades(state)
+
+    # ── Step 1b: Two-strike reassessment brain (T2/T3) ───────
+    if should_run_reassessment(state):
+        log("── Reassessing T2/T3 positions (two-strike brain) ──────")
+        state = run_trade_reassessments(state)
+        state["last_reassessment"] = now.isoformat()
+    else:
+        log("── Reassessment: skipped (< 3 days since last) ──────────")
 
     # ── Tier 1 — always ──────────────────────────────────
     log("── Tier 1: Short-term (1-7 days) ────────────────────────")
