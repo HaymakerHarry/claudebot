@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>Prescient</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap');
+:root {
+  --gold:#C9922A; --bg:#0a0a0a; --surface:#141414; --surface2:#1c1c1c;
+  --border:rgba(255,255,255,0.07); --text:#f0f0f0; --muted:#555;
+  --green:#27ae60; --red:#c0392b;
+  --green-dim:rgba(39,174,96,0.12); --red-dim:rgba(192,57,43,0.12);
+  --blue-dim:rgba(52,152,219,0.12); --blue:#3498db;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:'Syne',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+body{padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 40px)}
+.header{display:flex;align-items:center;justify-content:space-between;padding:20px 18px 16px;border-bottom:1px solid var(--border);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.logo{font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.logo span{color:var(--gold)}
+.header-right{display:flex;align-items:center;gap:10px}
+.ts{font-family:'Syne Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.5px;text-align:right;line-height:1.5}
+.refresh{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.refresh:active{color:var(--text)}
+.loading{text-align:center;padding:80px 20px;font-family:'Syne Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--muted)}
+.dot{display:inline-block;width:5px;height:5px;background:var(--gold);border-radius:50%;margin-right:8px;vertical-align:middle;animation:blink 1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.err{text-align:center;padding:60px 24px;color:var(--red);font-size:12px;line-height:1.7;display:none}
+#content{display:none}
+.bot-section{padding:20px 16px 0}
+.bot-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.live{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 2s ease-in-out infinite;flex-shrink:0}
+.bot-name{font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
+.bot-meta{font-family:'Syne Mono',monospace;font-size:9px;color:var(--muted);margin-left:auto}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 14px}
+.stat-label{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.stat-val{font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1}
+.stat-sub{font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);margin-top:5px}
+.pos{color:var(--green)} .neg{color:var(--red)} .gld{color:var(--gold)}
+.wr-track{height:3px;background:var(--surface2);border-radius:2px;margin-top:8px;overflow:hidden}
+.wr-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.trades-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:16px 16px 8px}
+.trade-list{padding:0 16px;display:flex;flex-direction:column;gap:6px}
+.trade{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;display:flex;align-items:flex-start;gap:10px}
+.badges{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.badge{font-family:'Syne Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.5px;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.b-yes{background:var(--green-dim);color:var(--green)}
+.b-no{background:var(--red-dim);color:var(--red)}
+.b-t1{background:var(--blue-dim);color:var(--blue)}
+.b-t2{background:rgba(201,146,42,0.12);color:var(--gold)}
+.b-t3{background:rgba(155,89,182,0.12);color:#9b59b6}
+.b-watch{background:rgba(255,165,0,0.12);color:orange}
+.trade-body{flex:1;min-width:0}
+.trade-name{font-size:11px;font-weight:600;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.trade-detail{font-family:'Syne Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px}
+.trade-right{text-align:right;flex-shrink:0}
+.trade-stake{font-size:12px;font-weight:700}
+.trade-upside{font-family:'Syne Mono',monospace;font-size:9px;color:var(--green);margin-top:2px}
+.none-msg{font-size:11px;color:var(--muted);padding:8px 0}
+.divider{height:1px;background:var(--border);margin:20px 16px 0}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">presc<span>i</span>ent</div>
+  <div class="header-right">
+    <div class="ts" id="ts">—</div>
+    <button class="refresh" onclick="load()">↻</button>
+  </div>
+</div>
+
+<div class="loading" id="loading"><span class="dot"></span>LOADING</div>
+<div class="err" id="err"></div>
+
+<div id="content">
+
+  <div class="bot-section">
+    <div class="bot-header">
+      <div class="live"></div>
+      <div class="bot-name">ClaudeBot</div>
+      <div class="bot-meta" id="cb-meta"></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Bankroll</div><div class="stat-val" id="cb-bank">—</div><div class="stat-sub" id="cb-roi">—</div></div>
+      <div class="stat"><div class="stat-label">Realized P&L</div><div class="stat-val" id="cb-pnl">—</div><div class="stat-sub" id="cb-rec">—</div></div>
+      <div class="stat"><div class="stat-label">Win rate</div><div class="stat-val" id="cb-wr">—</div><div class="wr-track"><div class="wr-fill" id="cb-wrf" style="width:0"></div></div></div>
+      <div class="stat"><div class="stat-label">Open</div><div class="stat-val" id="cb-open">—</div><div class="stat-sub" id="cb-dep">—</div></div>
+    </div>
+  </div>
+
+  <div class="trades-label">Open positions</div>
+  <div class="trade-list" id="cb-list"></div>
+
+  <div class="divider"></div>
+
+  <div class="bot-section" style="margin-top:20px">
+    <div class="bot-header">
+      <div class="live"></div>
+      <div class="bot-name">NoBot</div>
+      <div class="bot-meta" id="nb-meta"></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Bankroll</div><div class="stat-val" id="nb-bank">—</div><div class="stat-sub" id="nb-roi">—</div></div>
+      <div class="stat"><div class="stat-label">Realized P&L</div><div class="stat-val" id="nb-pnl">—</div><div class="stat-sub" id="nb-rec">—</div></div>
+      <div class="stat"><div class="stat-label">Win rate</div><div class="stat-val" id="nb-wr">—</div><div class="wr-track"><div class="wr-fill" id="nb-wrf" style="width:0"></div></div></div>
+      <div class="stat"><div class="stat-label">Open</div><div class="stat-val" id="nb-open">—</div><div class="stat-sub" id="nb-dep">—</div></div>
+    </div>
+  </div>
+
+  <div class="trades-label">Largest open positions</div>
+  <div class="trade-list" id="nb-list"></div>
+
+</div>
+
+<script>
+var CB='https://raw.githubusercontent.com/jamesgrimm1/claudebot/main/claudebot_log.json';
+var NB='https://raw.githubusercontent.com/jamesgrimm1/claudebot/main/nobot_log.json';
+var START=1000;
+
+function pct(n){return(n>=0?'+':'')+n.toFixed(1)+'%'}
+function moneyK(n){var a=Math.abs(n);return(n>=0?'+$':'-$')+(a>=1000?(a/1000).toFixed(1)+'k':a.toFixed(2))}
+function dLeft(c){if(!c)return'?';var d=(new Date(c)-Date.now())/86400000;return d<=0?'closing':d.toFixed(1)+'d'}
+function wrCol(w){return w>=65?'var(--green)':w>=50?'var(--gold)':'var(--red)'}
+function wrCls(w){return w>=65?'pos':w>=50?'gld':'neg'}
+
+function renderCB(d){
+  var trades=d.trades||[],closed=trades.filter(function(t){return t.status==='closed'}),open=trades.filter(function(t){return t.status==='open'}),won=closed.filter(function(t){return t.won});
+  var realized=closed.reduce(function(s,t){return s+(t.realized_pnl||0)},0);
+  var wr=closed.length?Math.round(won.length/closed.length*100):0;
+  var roi=(d.bankroll-START)/START*100,dep=open.reduce(function(s,t){return s+(t.stake||0)},0);
+  document.getElementById('cb-meta').textContent=d.scan_count+' scans';
+  document.getElementById('cb-bank').textContent='$'+d.bankroll.toFixed(2);
+  document.getElementById('cb-roi').textContent=pct(roi)+' ROI';
+  var pe=document.getElementById('cb-pnl');pe.textContent=moneyK(realized);pe.className='stat-val '+(realized>=0?'pos':'neg');
+  document.getElementById('cb-rec').textContent=won.length+'W / '+(closed.length-won.length)+'L';
+  var we=document.getElementById('cb-wr');we.textContent=wr+'%';we.className='stat-val '+wrCls(wr);
+  document.getElementById('cb-wrf').style.cssText='width:'+wr+'%;background:'+wrCol(wr);
+  document.getElementById('cb-open').textContent=open.length;
+  document.getElementById('cb-dep').textContent='$'+dep.toFixed(2)+' deployed';
+  var list=document.getElementById('cb-list');list.innerHTML='';
+  if(!open.length){list.innerHTML='<div class="none-msg">No open positions</div>';return}
+  open.forEach(function(t){
+    var tier=t.tier||1,pos=t.position==='YES',upside=t.stake?Math.round((t.potential_return/t.stake-1)*100):0;
+    var wb=t.watch?'<span class="badge b-watch">WATCH</span>':'';
+    list.innerHTML+='<div class="trade"><div class="badges"><span class="badge b-t'+tier+'">T'+tier+'</span><span class="badge '+(pos?'b-yes':'b-no')+'">'+t.position+'</span>'+wb+'</div><div class="trade-body"><div class="trade-name">'+t.market+'</div><div class="trade-detail">'+(t.category||'')+' · '+dLeft(t.closes)+' · '+(t.closes||'').slice(0,10)+'</div></div><div class="trade-right"><div class="trade-stake">$'+t.stake.toFixed(2)+'</div><div class="trade-upside">+'+upside+'%</div></div></div>';
+  });
+}
+
+function renderNB(d){
+  var trades=d.trades||[],closed=trades.filter(function(t){return t.status==='closed'}),open=trades.filter(function(t){return t.status==='open'}),won=closed.filter(function(t){return t.won});
+  var realized=closed.reduce(function(s,t){return s+(t.realized_pnl||0)},0);
+  var wr=closed.length?Math.round(won.length/closed.length*100):0;
+  var roi=(d.bankroll-START)/START*100,dep=open.reduce(function(s,t){return s+(t.stake||0)},0);
+  document.getElementById('nb-meta').textContent=d.scan_count+' scans';
+  document.getElementById('nb-bank').textContent='$'+d.bankroll.toFixed(2);
+  document.getElementById('nb-roi').textContent=pct(roi)+' ROI';
+  var pe=document.getElementById('nb-pnl');pe.textContent=moneyK(realized);pe.className='stat-val '+(realized>=0?'pos':'neg');
+  document.getElementById('nb-rec').textContent=won.length+'W / '+(closed.length-won.length)+'L';
+  var we=document.getElementById('nb-wr');we.textContent=wr+'%';we.className='stat-val '+wrCls(wr);
+  document.getElementById('nb-wrf').style.cssText='width:'+wr+'%;background:'+wrCol(wr);
+  document.getElementById('nb-open').textContent=open.length;
+  document.getElementById('nb-dep').textContent='$'+dep.toFixed(2)+' deployed';
+  var list=document.getElementById('nb-list');list.innerHTML='';
+  var top=open.slice().sort(function(a,b){return(b.stake||0)-(a.stake||0)}).slice(0,6);
+  if(!top.length){list.innerHTML='<div class="none-msg">No open positions</div>';return}
+  top.forEach(function(t){
+    var upside=t.stake&&t.payout_if_wins?Math.round((t.payout_if_wins/t.stake-1)*100):0;
+    list.innerHTML+='<div class="trade"><div class="badges"><span class="badge b-no">NO@'+(t.entry_no_price||'?')+'¢</span></div><div class="trade-body"><div class="trade-name">'+t.market+'</div><div class="trade-detail">'+dLeft(t.closes)+' · '+(t.closes||'').slice(0,10)+'</div></div><div class="trade-right"><div class="trade-stake">$'+t.stake.toFixed(2)+'</div><div class="trade-upside">+'+upside+'%</div></div></div>';
+  });
+}
+
+function load(){
+  document.getElementById('loading').style.display='block';
+  document.getElementById('content').style.display='none';
+  document.getElementById('err').style.display='none';
+  var t='?_='+Date.now();
+  Promise.all([
+    fetch(CB+t).then(function(r){if(!r.ok)throw new Error('ClaudeBot '+r.status);return r.json()}),
+    fetch(NB+t).then(function(r){if(!r.ok)throw new Error('NoBot '+r.status);return r.json()})
+  ]).then(function(res){
+    renderCB(res[0]);renderNB(res[1]);
+    var now=new Date();
+    document.getElementById('ts').innerHTML=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'<br>'+now.toLocaleDateString([],{day:'numeric',month:'short'});
+    document.getElementById('loading').style.display='none';
+    document.getElementById('content').style.display='block';
+  }).catch(function(e){
+    document.getElementById('loading').style.display='none';
+    document.getElementById('err').style.display='block';
+    document.getElementById('err').textContent='Failed to load\n'+e.message;
+  });
+}
+load();
+</script>
+</body>
+</html>
