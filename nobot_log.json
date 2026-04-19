@@ -1,5 +1,5 @@
 {
-  "bankroll": 798.79,
+  "bankroll": 804.64,
   "trades": [
     {
       "id": "NB1776304868",
@@ -3824,10 +3824,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 4835.990052000001,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-18T18:35:17.987587+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-19T16:29:25.696736+00:00",
+      "realized_pnl": 3.6
     },
     {
       "id": "NB1776537317",
@@ -4658,10 +4661,13 @@
       "closes": "2026-04-19T16:00:00+00:00",
       "volume": 59422.86785100003,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T13:54:38.338182+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-19T16:29:27.894061+00:00",
+      "realized_pnl": 2.39
     },
     {
       "id": "NB1776606878",
@@ -4725,11 +4731,53 @@
       "placed_at": "2026-04-19T14:35:30.032135+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776616180",
+      "market_id": "1970349",
+      "market_slug": "will-the-price-of-bitcoin-be-between-74000-76000-on-april-20",
+      "market": "Will the price of Bitcoin be between $74,000 and $76,000 on April 20?",
+      "position": "NO",
+      "entry_no_price": 58,
+      "entry_yes_price": 42,
+      "stake": 3.04,
+      "payout_if_wins": 5.24,
+      "profit_if_wins": 2.2,
+      "category": "crypto",
+      "closes_in_days": 0.98,
+      "closes": "2026-04-20T16:00:00+00:00",
+      "volume": 4348.587258999999,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T16:29:40.112805+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776616180",
+      "market_id": "1896548",
+      "market_slug": "will-trump-say-immigration-or-immigrant-during-king-charles-visit",
+      "market": "Will Trump say \"Immigration\" or \"Immigrant\" during King Charles visit?",
+      "position": "NO",
+      "entry_no_price": 50,
+      "entry_yes_price": 50,
+      "stake": 4.04,
+      "payout_if_wins": 8.08,
+      "profit_if_wins": 4.04,
+      "category": "politics",
+      "closes_in_days": 10.31,
+      "closes": "2026-04-30T00:00:00+00:00",
+      "volume": 4066.4810390000007,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T16:29:40.112849+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 11.65,
   "daily_reset": "2026-04-19",
-  "scan_count": 67,
+  "scan_count": 68,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-19T08:01:45.765828+00:00"
 }
