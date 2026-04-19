@@ -697,7 +697,8 @@ function renderCB(d) {
   var pe = document.getElementById('cb-pnl');
   pe.textContent = money(realized);
   pe.className   = 'hc-value ' + (realized >= 0 ? 'green' : 'red');
-  document.getElementById('cb-pnl-sub').textContent = pct(roi) + ' ROI · ' + won.length + 'W / ' + (closed.length-won.length) + 'L closed';
+  var realizedRoi = realized / START * 100;
+  document.getElementById('cb-pnl-sub').textContent = pct(realizedRoi) + ' ROI · ' + won.length + 'W / ' + (closed.length-won.length) + 'L closed';
   var we = document.getElementById('cb-wr');
   we.textContent = wr + '%';
   we.className   = 'hc-value ' + wrCls(wr);
@@ -860,7 +861,8 @@ function renderNB(d) {
   var pe = document.getElementById('nb-pnl');
   pe.textContent = money(realized);
   pe.className   = 'hc-value ' + (realized>=0?'green':'red');
-  document.getElementById('nb-pnl-sub').textContent = pct(roi) + ' ROI · ' + won.length+'W / '+(closed.length-won.length)+'L closed';
+  var realizedRoi = realized / START * 100;
+  document.getElementById('nb-pnl-sub').textContent = pct(realizedRoi) + ' ROI · ' + won.length+'W / '+(closed.length-won.length)+'L closed';
   var we = document.getElementById('nb-wr');
   we.textContent = wr+'%'; we.className = 'hc-value '+wrCls(wr);
   document.getElementById('nb-rec').textContent = closed.length+' closed trades';
