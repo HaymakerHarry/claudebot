@@ -349,7 +349,8 @@ def telegram_daily_summary(state):
             f"📋 Open ({len(open_t)}):\n"
             + (pos_private if pos_private else "  None\n") +
             f"{'─' * 30}\n"
-            f"⚡T1 short | 📅T2 medium | 🎯T3 long"
+            f"⚡T1 short | 📅T2 medium | 🎯T3 long\\n\\n"
+            f"📱 <a href=\"https://jamesgrimm1.github.io/claudebot/mobile.html\">Open mobile dashboard</a>"
         )
         send_telegram(private_msg, TELEGRAM_PERSONAL_ID)
 
