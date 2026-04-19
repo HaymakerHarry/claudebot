@@ -1,5 +1,5 @@
 {
-  "bankroll": 805.82,
+  "bankroll": 798.79,
   "trades": [
     {
       "id": "NB1776304868",
@@ -4683,11 +4683,53 @@
       "placed_at": "2026-04-19T13:54:38.338216+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776609330",
+      "market_id": "1969178",
+      "market_slug": "will-donald-trump-publicly-insult-barack-obama-by-april-30-2026-265",
+      "market": "Will Donald Trump publicly insult Barack Obama by April 30, 2026?",
+      "position": "NO",
+      "entry_no_price": 55,
+      "entry_yes_price": 45,
+      "stake": 3.02,
+      "payout_if_wins": 5.49,
+      "profit_if_wins": 2.47,
+      "category": "politics",
+      "closes_in_days": 10.39,
+      "closes": "2026-04-30T00:00:00+00:00",
+      "volume": 3691.1507210000027,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T14:35:30.032092+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776609330",
+      "market_id": "2011276",
+      "market_slug": "highest-temperature-in-singapore-on-april-20-2026-32corhigher",
+      "market": "Will the highest temperature in Singapore be 32\u00b0C or higher on April 20?",
+      "position": "NO",
+      "entry_no_price": 48,
+      "entry_yes_price": 52,
+      "stake": 4.01,
+      "payout_if_wins": 8.35,
+      "profit_if_wins": 4.34,
+      "category": "weather",
+      "closes_in_days": 0.89,
+      "closes": "2026-04-20T12:00:00+00:00",
+      "volume": 3468.990441999999,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T14:35:30.032135+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 11.65,
   "daily_reset": "2026-04-19",
-  "scan_count": 65,
+  "scan_count": 66,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-19T08:01:45.765828+00:00"
 }
