@@ -1,5 +1,5 @@
 {
-  "bankroll": 807.54,
+  "bankroll": 805.0,
   "trades": [
     {
       "id": "NB1776304868",
@@ -305,10 +305,13 @@
       "closes": "2026-04-19T16:00:00+00:00",
       "volume": 5462.011025999999,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T02:01:08.863579+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-19T19:35:36.975196+00:00",
+      "realized_pnl": -4.76
     },
     {
       "id": "NB1776304868",
@@ -1280,10 +1283,13 @@
       "closes": "2026-04-19T16:00:00+00:00",
       "volume": 8988.242746,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-16T15:19:50.216774+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-19T19:35:38.511066+00:00",
+      "realized_pnl": -4.38
     },
     {
       "id": "NB1776352790",
@@ -3854,10 +3860,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 3895.7225150000004,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-18T18:35:17.987613+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-19T19:35:41.518954+00:00",
+      "realized_pnl": 3.73
     },
     {
       "id": "NB1776537317",
@@ -4433,10 +4442,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 3444.1585139999997,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T06:25:25.330275+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-19T19:35:42.595289+00:00",
+      "realized_pnl": -3.9
     },
     {
       "id": "NB1776579925",
@@ -4658,10 +4670,13 @@
       "closes": "2026-04-19T16:00:00+00:00",
       "volume": 65746.434141,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T13:54:38.338141+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-19T19:35:44.291950+00:00",
+      "realized_pnl": -4.07
     },
     {
       "id": "NB1776606878",
@@ -4812,11 +4827,74 @@
       "placed_at": "2026-04-19T18:35:58.339976+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776627353",
+      "market_id": "2008448",
+      "market_slug": "will-anthropic-provide-mythos-to-the-us-government-by-april-30-2026",
+      "market": "Will Anthropic provide Mythos to the US government by April 30, 2026?",
+      "position": "NO",
+      "entry_no_price": 46,
+      "entry_yes_price": 54,
+      "stake": 4.08,
+      "payout_if_wins": 8.87,
+      "profit_if_wins": 4.79,
+      "category": "other",
+      "closes_in_days": 10.18,
+      "closes": "2026-04-30T00:00:00+00:00",
+      "volume": 6231.824353000002,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T19:35:53.354388+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776627353",
+      "market_id": "2011329",
+      "market_slug": "highest-temperature-in-chongqing-on-april-20-2026-20c",
+      "market": "Will the highest temperature in Chongqing be 20\u00b0C on April 20?",
+      "position": "NO",
+      "entry_no_price": 53,
+      "entry_yes_price": 47,
+      "stake": 3.04,
+      "payout_if_wins": 5.74,
+      "profit_if_wins": 2.7,
+      "category": "weather",
+      "closes_in_days": 0.68,
+      "closes": "2026-04-20T12:00:00+00:00",
+      "volume": 5124.474768000001,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T19:35:53.354434+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776627353",
+      "market_id": "2011331",
+      "market_slug": "highest-temperature-in-chongqing-on-april-20-2026-22corhigher",
+      "market": "Will the highest temperature in Chongqing be 22\u00b0C or higher on April 20?",
+      "position": "NO",
+      "entry_no_price": 58,
+      "entry_yes_price": 42,
+      "stake": 3.03,
+      "payout_if_wins": 5.22,
+      "profit_if_wins": 2.19,
+      "category": "weather",
+      "closes_in_days": 0.68,
+      "closes": "2026-04-20T12:00:00+00:00",
+      "volume": 4628.909385999999,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T19:35:53.354459+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
-  "daily_loss": 26.06,
+  "daily_loss": 43.17,
   "daily_reset": "2026-04-19",
-  "scan_count": 70,
+  "scan_count": 71,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-19T08:01:45.765828+00:00"
 }
