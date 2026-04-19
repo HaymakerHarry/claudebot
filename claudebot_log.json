@@ -162,7 +162,10 @@
       "status": "open",
       "placed_at": "2026-04-04T02:54:51.276932+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "watch": true,
+      "watch_reason": "CDC reports 1,748 cases as of April 16 with 14 days remaining. Need 452 more cases in 14 days = ~32.3 cases/day required. Recent pace from March 26 to April 16 (21 days): 173 new cases = only 8.2 cases/day \u2014 a sharp deceleration from the earlier 18.5/day average. At this reduced ~8 cases/day rate, we'd reach only ~1,860 by April 30, well short of 2,200. The bear case of outbreak containment and deceleration appears to be materializing. Thesis is significantly weakened but not yet impossible \u2014 a new outbreak cluster could spike counts. Flagging for close next cycle if pace doesn't accelerate.",
+      "watch_since": "2026-04-19"
     },
     {
       "id": "T1775308537",
@@ -258,10 +261,13 @@
       ],
       "bear_case": "ECB historically cautious on reversals; forecasts may be conditional on inflation data not yet published; other banks may disagree with Barclays/JPM",
       "kelly_tier": "quarter-Kelly (5.0%)",
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-06T03:33:05.273928+00:00",
       "paper": true,
-      "model": "claude-opus-4-6"
+      "model": "claude-opus-4-6",
+      "won": false,
+      "resolved_at": "2026-04-19T06:25:53.251463+00:00",
+      "realized_pnl": -63.0
     },
     {
       "id": "T1775446386",
@@ -780,11 +786,12 @@
       "realized_pnl": 93.18
     }
   ],
-  "daily_loss": 0.0,
+  "daily_loss": 63.0,
   "daily_reset": "2026-04-19",
-  "scan_count": 122,
+  "scan_count": 123,
   "started": "2026-04-02T00:00:00+00:00",
   "last_daily_summary": "2026-04-18",
   "last_tier2_scan": "2026-04-19",
-  "last_tier3_scan": "2026-W15"
+  "last_tier3_scan": "2026-W15",
+  "last_reassessment": "2026-04-19T06:25:25.990455+00:00"
 }

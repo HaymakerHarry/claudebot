@@ -1,5 +1,5 @@
 {
-  "bankroll": 744.45,
+  "bankroll": 773.61,
   "trades": [
     {
       "id": "NB1776304868",
@@ -3599,10 +3599,13 @@
       "closes": "2026-04-20T00:00:00+00:00",
       "volume": 4538.709956,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-18T15:30:31.723946+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-19T06:25:11.726082+00:00",
+      "realized_pnl": 4.09
     },
     {
       "id": "NB1776529735",
@@ -3980,10 +3983,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 4387.999012000002,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-18T23:27:11.344598+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-19T06:25:12.937837+00:00",
+      "realized_pnl": 4.15
     },
     {
       "id": "NB1776563374",
@@ -4043,10 +4049,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 4798.101653000006,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T01:49:34.472819+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-19T06:25:13.058972+00:00",
+      "realized_pnl": 3.57
     },
     {
       "id": "NB1776563374",
@@ -4064,10 +4073,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 4151.422027,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T01:49:34.472840+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-19T06:25:13.116496+00:00",
+      "realized_pnl": 1.15
     },
     {
       "id": "NB1776563374",
@@ -4169,10 +4181,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 3778.5101900000036,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T03:35:08.821033+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-19T06:25:13.361613+00:00",
+      "realized_pnl": 1.11
     },
     {
       "id": "NB1776569708",
@@ -4211,10 +4226,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 3481.839825000001,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T03:35:08.821085+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-19T06:25:13.467922+00:00",
+      "realized_pnl": 1.2
     },
     {
       "id": "NB1776569708",
@@ -4253,10 +4271,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 6958.091825999997,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T04:15:45.838234+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-19T06:25:13.690604+00:00",
+      "realized_pnl": 3.48
     },
     {
       "id": "NB1776572145",
@@ -4299,11 +4320,95 @@
       "placed_at": "2026-04-19T04:15:45.838301+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776579925",
+      "market_id": "1999910",
+      "market_slug": "elon-musk-of-tweets-april-18-april-20-40-64",
+      "market": "Will Elon Musk post 40-64 tweets from April 18 to April 20, 2026?",
+      "position": "NO",
+      "entry_no_price": 58,
+      "entry_yes_price": 42,
+      "stake": 2.94,
+      "payout_if_wins": 5.07,
+      "profit_if_wins": 2.13,
+      "category": "other",
+      "closes_in_days": 1.4,
+      "closes": "2026-04-20T16:00:00+00:00",
+      "volume": 53788.27489599991,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T06:25:25.330197+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776579925",
+      "market_id": "2003871",
+      "market_slug": "highest-temperature-in-milan-on-april-19-2026-23c",
+      "market": "Will the highest temperature in Milan be 23\u00b0C on April 19?",
+      "position": "NO",
+      "entry_no_price": 60,
+      "entry_yes_price": 40,
+      "stake": 1.95,
+      "payout_if_wins": 3.25,
+      "profit_if_wins": 1.3,
+      "category": "weather",
+      "closes_in_days": 0.23,
+      "closes": "2026-04-19T12:00:00+00:00",
+      "volume": 4033.5293789999982,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T06:25:25.330244+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776579925",
+      "market_id": "2003916",
+      "market_slug": "highest-temperature-in-chongqing-on-april-19-2026-28c",
+      "market": "Will the highest temperature in Chongqing be 28\u00b0C on April 19?",
+      "position": "NO",
+      "entry_no_price": 48,
+      "entry_yes_price": 52,
+      "stake": 3.9,
+      "payout_if_wins": 8.12,
+      "profit_if_wins": 4.22,
+      "category": "weather",
+      "closes_in_days": 0.23,
+      "closes": "2026-04-19T12:00:00+00:00",
+      "volume": 3444.1585139999997,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T06:25:25.330275+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776579925",
+      "market_id": "2003650",
+      "market_slug": "highest-temperature-in-paris-on-april-19-2026-18c",
+      "market": "Will the highest temperature in Paris be 18\u00b0C on April 19?",
+      "position": "NO",
+      "entry_no_price": 60,
+      "entry_yes_price": 40,
+      "stake": 1.94,
+      "payout_if_wins": 3.23,
+      "profit_if_wins": 1.29,
+      "category": "weather",
+      "closes_in_days": 0.23,
+      "closes": "2026-04-19T12:00:00+00:00",
+      "volume": 3416.920434000003,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-19T06:25:25.330302+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 3.88,
   "daily_reset": "2026-04-19",
-  "scan_count": 58,
+  "scan_count": 59,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-18T18:34:51.559911+00:00"
 }
