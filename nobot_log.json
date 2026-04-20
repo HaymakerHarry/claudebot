@@ -1,5 +1,5 @@
 {
-  "bankroll": 770.29,
+  "bankroll": 771.08,
   "trades": [
     {
       "id": "NB1776304868",
@@ -4205,10 +4205,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 9998.743285000006,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T03:35:08.820932+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-20T07:12:01.254981+00:00",
+      "realized_pnl": -2.89
     },
     {
       "id": "NB1776569708",
@@ -4784,10 +4787,13 @@
       "closes": "2026-04-20T12:00:00+00:00",
       "volume": 3468.990441999999,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T14:35:30.032135+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-20T07:12:01.676551+00:00",
+      "realized_pnl": -4.01
     },
     {
       "id": "NB1776616180",
@@ -4979,10 +4985,13 @@
       "closes": "2026-04-20T12:00:00+00:00",
       "volume": 3451.9255249999987,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T20:28:10.697160+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-20T07:12:02.428626+00:00",
+      "realized_pnl": 2.2
     },
     {
       "id": "NB1776630490",
@@ -5237,10 +5246,13 @@
       "closes": "2026-04-30T00:00:00+00:00",
       "volume": 6672.049242000001,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-20T01:51:24.852690+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-20T07:12:03.565546+00:00",
+      "realized_pnl": -3.9
     },
     {
       "id": "NB1776649884",
@@ -5258,10 +5270,13 @@
       "closes": "2026-04-30T00:00:00+00:00",
       "volume": 3800.1033930000003,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-20T01:51:24.852719+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-20T07:12:03.762235+00:00",
+      "realized_pnl": -2.91
     },
     {
       "id": "NB1776649884",
@@ -5363,10 +5378,13 @@
       "closes": "2026-04-20T12:00:00+00:00",
       "volume": 4462.911852999999,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-20T04:52:05.803186+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-20T07:12:04.108525+00:00",
+      "realized_pnl": 2.35
     },
     {
       "id": "NB1776660725",
@@ -5472,11 +5490,74 @@
       "placed_at": "2026-04-20T04:52:05.803339+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776669134",
+      "market_id": "2011052",
+      "market_slug": "highest-temperature-in-london-on-april-20-2026-14c",
+      "market": "Will the highest temperature in London be 14\u00b0C on April 20?",
+      "position": "NO",
+      "entry_no_price": 61,
+      "entry_yes_price": 39,
+      "stake": 1.95,
+      "payout_if_wins": 3.2,
+      "profit_if_wins": 1.25,
+      "category": "weather",
+      "closes_in_days": 0.2,
+      "closes": "2026-04-20T12:00:00+00:00",
+      "volume": 6324.158633000002,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-20T07:12:14.368604+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776669134",
+      "market_id": "2011202",
+      "market_slug": "highest-temperature-in-lucknow-on-april-20-2026-41c",
+      "market": "Will the highest temperature in Lucknow be 41\u00b0C on April 20?",
+      "position": "NO",
+      "entry_no_price": 50,
+      "entry_yes_price": 50,
+      "stake": 3.89,
+      "payout_if_wins": 7.78,
+      "profit_if_wins": 3.89,
+      "category": "weather",
+      "closes_in_days": 0.2,
+      "closes": "2026-04-20T12:00:00+00:00",
+      "volume": 4699.440071,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-20T07:12:14.368640+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776669134",
+      "market_id": "2011452",
+      "market_slug": "highest-temperature-in-istanbul-on-april-20-2026-19corhigher",
+      "market": "Will the highest temperature in Istanbul be 19\u00b0C or higher on April 20?",
+      "position": "NO",
+      "entry_no_price": 48,
+      "entry_yes_price": 52,
+      "stake": 3.87,
+      "payout_if_wins": 8.06,
+      "profit_if_wins": 4.19,
+      "category": "weather",
+      "closes_in_days": 0.2,
+      "closes": "2026-04-20T12:00:00+00:00",
+      "volume": 3464.9565210000005,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-20T07:12:14.368661+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
-  "daily_loss": 5.85,
+  "daily_loss": 19.56,
   "daily_reset": "2026-04-20",
-  "scan_count": 77,
+  "scan_count": 78,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-19T20:27:45.688589+00:00"
 }
