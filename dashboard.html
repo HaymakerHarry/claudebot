@@ -1121,8 +1121,11 @@ function loadData() {
   document.getElementById('main').style.display           = 'none';
 
   var bust = '?_=' + Date.now();
-  // NB2 is optional — if file not in repo yet, dashboard still loads
-  var nb2Fetch = fetch(NB2_URL + bust).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+  // NB2 is optional — timeout after 4s so it never blocks the dashboard
+  var nb2Fetch = Promise.race([
+    fetch(NB2_URL + bust).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+    new Promise(function(resolve){ setTimeout(function(){ resolve(null); }, 4000); })
+  ]);
 
   Promise.all([
     fetch(CB_URL  + bust).then(function(r){ if(!r.ok) throw new Error('ClaudeBot HTTP ' + r.status); return r.json(); }),
