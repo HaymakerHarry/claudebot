@@ -1,5 +1,5 @@
 {
-  "bankroll": 768.47,
+  "bankroll": 770.44,
   "trades": [
     {
       "id": "NB1776304868",
@@ -4661,10 +4661,13 @@
       "closes": "2026-04-19T12:00:00+00:00",
       "volume": 3462.3002189999993,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-19T09:39:39.422638+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-20T09:50:07.149016+00:00",
+      "realized_pnl": -2.93
     },
     {
       "id": "NB1776598123",
@@ -5537,10 +5540,13 @@
       "closes": "2026-04-20T12:00:00+00:00",
       "volume": 4699.440071,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-20T07:12:14.368640+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-20T09:50:09.320846+00:00",
+      "realized_pnl": 3.89
     },
     {
       "id": "NB1776669134",
@@ -5604,11 +5610,53 @@
       "placed_at": "2026-04-20T08:04:43.671627+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776678618",
+      "market_id": "2011063",
+      "market_slug": "highest-temperature-in-paris-on-april-20-2026-16c",
+      "market": "Will the highest temperature in Paris be 16\u00b0C on April 20?",
+      "position": "NO",
+      "entry_no_price": 56,
+      "entry_yes_price": 44,
+      "stake": 2.91,
+      "payout_if_wins": 5.2,
+      "profit_if_wins": 2.29,
+      "category": "weather",
+      "closes_in_days": 0.09,
+      "closes": "2026-04-20T12:00:00+00:00",
+      "volume": 6514.13352400001,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-20T09:50:18.382482+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776678618",
+      "market_id": "2011149",
+      "market_slug": "highest-temperature-in-atlanta-on-april-20-2026-76-77f",
+      "market": "Will the highest temperature in Atlanta be between 76-77\u00b0F on April 20?",
+      "position": "NO",
+      "entry_no_price": 56,
+      "entry_yes_price": 44,
+      "stake": 2.9,
+      "payout_if_wins": 5.18,
+      "profit_if_wins": 2.28,
+      "category": "weather",
+      "closes_in_days": 0.09,
+      "closes": "2026-04-20T12:00:00+00:00",
+      "volume": 5796.958687000002,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-20T09:50:18.382528+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
-  "daily_loss": 24.37,
+  "daily_loss": 27.3,
   "daily_reset": "2026-04-20",
-  "scan_count": 79,
+  "scan_count": 80,
   "started": "2026-04-16T00:00:00+00:00",
-  "last_summary_sent": "2026-04-19T20:27:45.688589+00:00"
+  "last_summary_sent": "2026-04-20T09:50:00.334644+00:00"
 }

@@ -1,5 +1,5 @@
 {
-  "bankroll": 1497.9,
+  "bankroll": 1348.11,
   "trades": [
     {
       "id": "T1775098669",
@@ -848,14 +848,45 @@
       "placed_at": "2026-04-19T09:41:54.799923+00:00",
       "paper": true,
       "model": "claude-opus-4-6"
+    },
+    {
+      "id": "T1776678792",
+      "tier": 1,
+      "market_id": "2029629",
+      "market_slug": "highest-temperature-in-ankara-on-april-22-2026-16c",
+      "market": "Will the highest temperature in Ankara be 16\u00b0C on April 22?",
+      "position": "NO",
+      "entry_price": 69,
+      "stake": 149.79,
+      "potential_return": 217.09,
+      "potential_profit": 67.3,
+      "confidence": 78,
+      "true_prob": 13,
+      "market_prob": 31,
+      "category": "weather",
+      "closes_in_days": 2.1,
+      "closes": "2026-04-22T12:00:00+00:00",
+      "research_summary": "Met Office forecast updated April 18 shows 12\u00b0C maximum for Ankara near-term, 4\u00b0C below the 16\u00b0C target. Historical late-April averages peak at 18.4\u00b0C with early-April at 13.9\u00b0C. Even with moderate warming from the forecast baseline, hitting exactly 16\u00b0C requires a precise overshoot that is statistically unlikely.",
+      "key_factors": [
+        "Met Office forecast shows 12\u00b0C maximum, well below 16\u00b0C target \u2014 a 4\u00b0C gap that exceeds typical forecast error",
+        "Exact integer temperature matches have inherently low probability (~15-20% even when centered near expected value)",
+        "Near-term forecast window from April 18 likely encompasses April 22 within standard 5-day range"
+      ],
+      "bear_case": "The 12\u00b0C forecast may apply to April 18-20 only \u2014 if a rapid warming trend pushes temperatures toward the 16-17\u00b0C late-April climatological average, probability of exactly 16\u00b0C increases significantly",
+      "kelly_tier": "half-Kelly (10.0%)",
+      "news_triggered": true,
+      "status": "open",
+      "placed_at": "2026-04-20T09:53:12.519445+00:00",
+      "paper": true,
+      "model": "claude-opus-4-6"
     }
   ],
-  "daily_loss": 63.0,
-  "daily_reset": "2026-04-19",
-  "scan_count": 128,
+  "daily_loss": 0.0,
+  "daily_reset": "2026-04-20",
+  "scan_count": 129,
   "started": "2026-04-02T00:00:00+00:00",
-  "last_daily_summary": "2026-04-19",
-  "last_tier2_scan": "2026-04-19",
-  "last_tier3_scan": "2026-W15",
+  "last_daily_summary": "2026-04-20",
+  "last_tier2_scan": "2026-04-20",
+  "last_tier3_scan": "2026-W16",
   "last_reassessment": "2026-04-19T06:25:25.990455+00:00"
 }
