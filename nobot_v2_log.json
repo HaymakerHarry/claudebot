@@ -1,5 +1,5 @@
 {
-  "bankroll": 655.98,
+  "bankroll": 650.58,
   "trades": [
     {
       "id": "NB1776304868",
@@ -5016,11 +5016,53 @@
       "placed_at": "2026-04-20T15:11:13.311956+00:00",
       "paper": true,
       "model": "nobot-v2"
+    },
+    {
+      "id": "NB1776704186",
+      "market_id": "2029353",
+      "market_slug": "will-bitcoin-dip-to-72k-april-20-26",
+      "market": "Will Bitcoin dip to $72,000 April 20-26?",
+      "position": "NO",
+      "entry_no_price": 59,
+      "entry_yes_price": 41,
+      "stake": 2.72,
+      "payout_if_wins": 4.61,
+      "profit_if_wins": 1.89,
+      "category": "crypto",
+      "closes_in_days": 6.46,
+      "closes": "2026-04-27T04:00:00+00:00",
+      "volume": 3777.3023919999996,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-20T16:56:26.962095+00:00",
+      "paper": true,
+      "model": "nobot-v2"
+    },
+    {
+      "id": "NB1776704186",
+      "market_id": "2007076",
+      "market_slug": "bitcoin-above-76k-on-april-24",
+      "market": "Will the price of Bitcoin be above $76,000 on April 24?",
+      "position": "NO",
+      "entry_no_price": 57,
+      "entry_yes_price": 43,
+      "stake": 2.68,
+      "payout_if_wins": 4.7,
+      "profit_if_wins": 2.02,
+      "category": "crypto",
+      "closes_in_days": 3.96,
+      "closes": "2026-04-24T16:00:00+00:00",
+      "volume": 3577.9667700000023,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-20T16:56:26.962127+00:00",
+      "paper": true,
+      "model": "nobot-v2"
     }
   ],
   "daily_loss": 22.27,
   "daily_reset": "2026-04-20",
-  "scan_count": 83,
+  "scan_count": 84,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-20T09:50:19.013457+00:00",
   "v2_note": "Trades replayed with V2 sizing: reversed brackets + volume multiplier"
