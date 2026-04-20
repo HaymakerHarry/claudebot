@@ -1,5 +1,5 @@
 {
-  "bankroll": 780.97,
+  "bankroll": 784.83,
   "trades": [
     {
       "id": "NB1776304868",
@@ -5489,10 +5489,13 @@
       "closes": "2026-04-20T12:00:00+00:00",
       "volume": 3337.193863000002,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-20T04:52:05.803283+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": true,
+      "resolved_at": "2026-04-20T21:38:53.031358+00:00",
+      "realized_pnl": 3.9
     },
     {
       "id": "NB1776660725",
@@ -5973,11 +5976,32 @@
       "placed_at": "2026-04-20T20:38:19.791510+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776721144",
+      "market_id": "2019116",
+      "market_slug": "highest-temperature-in-london-on-april-21-2026-14c",
+      "market": "Will the highest temperature in London be 14\u00b0C on April 21?",
+      "position": "NO",
+      "entry_no_price": 48,
+      "entry_yes_price": 52,
+      "stake": 3.94,
+      "payout_if_wins": 8.21,
+      "profit_if_wins": 4.27,
+      "category": "weather",
+      "closes_in_days": 0.6,
+      "closes": "2026-04-21T12:00:00+00:00",
+      "volume": 4015.7294799999995,
+      "exit_target": 90,
+      "status": "open",
+      "placed_at": "2026-04-20T21:39:04.566769+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
   "daily_loss": 47.55,
   "daily_reset": "2026-04-20",
-  "scan_count": 88,
+  "scan_count": 89,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-20T09:50:00.334644+00:00"
 }
