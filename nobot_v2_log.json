@@ -5242,7 +5242,7 @@
   ],
   "daily_loss": 27.78,
   "daily_reset": "2026-04-20",
-  "scan_count": 90,
+  "scan_count": 91,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-20T22:35:28.058846+00:00",
   "v2_note": "Trades replayed with V2 sizing: reversed brackets + volume multiplier"
