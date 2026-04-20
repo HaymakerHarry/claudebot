@@ -757,8 +757,8 @@ def single_scan():
     new_trades = 0
     open_ids   = {t["market_id"] for t in state["trades"] if t["status"] == "open"}
 
-    # Max deployment cap — never deploy more than 40% of starting bankroll at once
-    max_deploy    = state["bankroll"] * 0.40
+    # Max deployment cap — V2 uses larger stakes so cap is higher
+    max_deploy    = state["bankroll"] * 0.70
     current_deploy = sum(t["stake"] for t in state["trades"] if t["status"] == "open")
 
     for market in filtered:
