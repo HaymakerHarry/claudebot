@@ -1,5 +1,5 @@
 {
-  "bankroll": 746.22,
+  "bankroll": 743.42,
   "trades": [
     {
       "id": "NB1776304868",
@@ -5462,10 +5462,13 @@
       "closes": "2026-04-20T12:00:00+00:00",
       "volume": 3666.8540370000032,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-20T04:52:05.803229+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-21T07:03:58.318189+00:00",
+      "realized_pnl": -2.94
     },
     {
       "id": "NB1776660725",
@@ -5717,10 +5720,13 @@
       "closes": "2026-04-20T12:00:00+00:00",
       "volume": 5796.958687000002,
       "exit_target": 90,
-      "status": "open",
+      "status": "closed",
       "placed_at": "2026-04-20T09:50:18.382528+00:00",
       "paper": true,
-      "model": "nobot-mechanical"
+      "model": "nobot-mechanical",
+      "won": false,
+      "resolved_at": "2026-04-21T07:03:58.691685+00:00",
+      "realized_pnl": -2.9
     },
     {
       "id": "NB1776683587",
@@ -6441,11 +6447,31 @@
       "placed_at": "2026-04-21T06:30:25.274704+00:00",
       "paper": true,
       "model": "nobot-mechanical"
+    },
+    {
+      "id": "NB1776755052",
+      "market_id": "2019115",
+      "market_slug": "highest-temperature-in-london-on-april-21-2026-13c",
+      "market": "Will the highest temperature in London be 13\u00b0C on April 21?",
+      "position": "NO",
+      "entry_no_price": 57,
+      "entry_yes_price": 42,
+      "stake": 2.8,
+      "payout_if_wins": 4.91,
+      "profit_if_wins": 2.11,
+      "category": "weather",
+      "closes_in_days": 0.21,
+      "closes": "2026-04-21T12:00:00+00:00",
+      "volume": 9026.155608000003,
+      "status": "open",
+      "placed_at": "2026-04-21T07:04:12.607982+00:00",
+      "paper": true,
+      "model": "nobot-mechanical"
     }
   ],
-  "daily_loss": 18.55,
+  "daily_loss": 24.39,
   "daily_reset": "2026-04-21",
-  "scan_count": 95,
+  "scan_count": 96,
   "started": "2026-04-16T00:00:00+00:00",
   "last_summary_sent": "2026-04-20T22:34:57.389897+00:00"
 }

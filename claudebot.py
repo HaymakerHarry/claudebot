@@ -852,6 +852,87 @@ def ddg_search(query, max_results=5):
         return []
 
 
+# ── Coin slug mapping ─────────────────────────────────────
+COIN_MAP = {
+    "bitcoin":  {"binance": "BTCUSDT",  "coingecko": "bitcoin"},
+    "btc":      {"binance": "BTCUSDT",  "coingecko": "bitcoin"},
+    "ethereum": {"binance": "ETHUSDT",  "coingecko": "ethereum"},
+    "eth":      {"binance": "ETHUSDT",  "coingecko": "ethereum"},
+    "solana":   {"binance": "SOLUSDT",  "coingecko": "solana"},
+    "sol":      {"binance": "SOLUSDT",  "coingecko": "solana"},
+    "xrp":      {"binance": "XRPUSDT",  "coingecko": "ripple"},
+    "bnb":      {"binance": "BNBUSDT",  "coingecko": "binancecoin"},
+    "hyperliquid": {"binance": None,    "coingecko": "hyperliquid"},
+}
+
+def get_crypto_price(question):
+    """
+    Fetch live price data for the coin mentioned in a market question.
+    Tries Binance first (no key, real-time), falls back to CoinGecko.
+    Returns a formatted string ready to inject into the research prompt.
+    """
+    q = question.lower()
+    coin_key = None
+    for k in COIN_MAP:
+        if k in q:
+            coin_key = k
+            break
+    if not coin_key:
+        return None
+
+    cfg = COIN_MAP[coin_key]
+
+    # ── Try Binance first ─────────────────────────────────
+    if cfg["binance"]:
+        try:
+            r = requests.get(
+                f"https://api.binance.com/api/v3/ticker/24hr?symbol={cfg['binance']}",
+                timeout=6
+            )
+            if r.status_code == 200:
+                d = r.json()
+                price    = float(d["lastPrice"])
+                chg      = float(d["priceChangePercent"])
+                high     = float(d["highPrice"])
+                low      = float(d["lowPrice"])
+                vol      = float(d["volume"])
+                log(f"     💰 Binance {coin_key.upper()}: ${price:,.2f} ({chg:+.2f}% 24h)")
+                return (
+                    f"LIVE PRICE DATA ({coin_key.upper()} via Binance, fetched now):\n"
+                    f"  Current price: ${price:,.2f}\n"
+                    f"  24h change:    {chg:+.2f}%\n"
+                    f"  24h high:      ${high:,.2f}\n"
+                    f"  24h low:       ${low:,.2f}\n"
+                    f"  24h volume:    {vol:,.0f} {coin_key.upper()}\n"
+                )
+        except Exception as e:
+            log(f"     ⚠️  Binance price fetch failed: {e}")
+
+    # ── Fallback: CoinGecko (no key needed) ───────────────
+    try:
+        cg_id = cfg["coingecko"]
+        r = requests.get(
+            f"https://api.coingecko.com/api/v3/simple/price"
+            f"?ids={cg_id}&vs_currencies=usd"
+            f"&include_24hr_change=true&include_24hr_vol=true&include_24hr_high_low=true",
+            timeout=6
+        )
+        if r.status_code == 200:
+            d = r.json().get(cg_id, {})
+            price = d.get("usd", 0)
+            chg   = d.get("usd_24h_change", 0)
+            log(f"     💰 CoinGecko {coin_key.upper()}: ${price:,.2f} ({chg:+.2f}% 24h)")
+            return (
+                f"LIVE PRICE DATA ({coin_key.upper()} via CoinGecko, fetched now):\n"
+                f"  Current price: ${price:,.2f}\n"
+                f"  24h change:    {chg:+.2f}%\n"
+            )
+    except Exception as e:
+        log(f"     ⚠️  CoinGecko price fetch failed: {e}")
+
+    return None
+
+
 def search_market(market):
     query   = build_search_query(market)
     results = ddg_search(query)
@@ -909,8 +990,19 @@ def research_all_markets(markets):
     log(f"🔬 Researching {len(markets)} markets...")
     for i, market in enumerate(markets):
         log(f"  [{i+1}/{len(markets)}] {market['question'][:65]}")
+
+        # Fetch live crypto price before DDG search
+        live_price = None
+        if get_category(market["question"]) == "crypto":
+            live_price = get_crypto_price(market["question"])
+
         query, raw = search_market(market)
         brief = haiku_interpret(client, market, query, raw)
+
+        # Prepend live price data to the research brief
+        if live_price:
+            brief = live_price + "\n" + brief
+
         log(f"     📋 {brief[:100]}...")
         research[market["id"]] = brief
     return research
