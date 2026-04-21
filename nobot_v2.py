@@ -16,10 +16,10 @@
 ║  $0.56–$0.58 → 0.410% × volume_mult                     ║
 ║  $0.59–$0.62 → 0.415% × volume_mult                     ║
 ║                                                          ║
-║  Volume multipliers:                                     ║
+║  Volume multipliers (capped at 2.5x):                    ║
 ║  < $5k    → 1.0x   |  $5-10k   → 1.5x                   ║
-║  $10-50k  → 2.5x   |  $50-500k → 4.0x                   ║
-║  > $500k  → 6.0x                                         ║
+║  $10-100k → 2.5x   |  $50-100k → 1.5x                   ║
+║  > $100k  → 1.0x  (sharp markets — no edge)              ║
 ║                                                          ║
 ║  Exit: sell when NO price reaches $0.90                  ║
 ║  Hold: resolve if market closes before hitting $0.90     ║
@@ -76,13 +76,13 @@ STAKE_BRACKETS = [
     {"min_no": 59, "max_no": 62, "pct": 0.415},   # highest prob → biggest base
 ]
 
-# Volume multipliers — scale stake with market liquidity
+# Volume multipliers — capped at 2.5x, 100k+ reduced to 1.0x (adverse selection risk)
 VOLUME_MULTIPLIERS = [
-    {"min_vol": 500_000, "mult": 6.0},
-    {"min_vol":  50_000, "mult": 4.0},
-    {"min_vol":  10_000, "mult": 2.5},
-    {"min_vol":   5_000, "mult": 1.5},
-    {"min_vol":       0, "mult": 1.0},
+    {"min_vol": 100_000, "mult": 1.0},   # sharp markets — no edge, don't oversize
+    {"min_vol":  50_000, "mult": 1.5},   # high volume — cautious
+    {"min_vol":  10_000, "mult": 2.5},   # sweet spot — max multiplier
+    {"min_vol":   5_000, "mult": 1.5},   # decent volume
+    {"min_vol":       0, "mult": 1.0},   # thin markets — base only
 ]
 
 # Min market volume — avoid thin books
